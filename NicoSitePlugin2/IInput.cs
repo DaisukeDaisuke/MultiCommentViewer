@@ -47,6 +47,21 @@
             Raw = liveId;
         }
     }
+    class UserId : IInput
+    {
+        /// <summary>
+        /// \d+
+        /// </summary>
+        public string Raw { get; }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId">\d+</param>
+        public UserId(string userId)
+        {
+            Raw = userId;
+        }
+    }
     class InvalidInput : IInput
     {
         public InvalidInput(string raw)

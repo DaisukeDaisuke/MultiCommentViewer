@@ -5,6 +5,8 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Google.Protobuf.WellKnownTypes.Field.Types;
+using System.Diagnostics;
 
 namespace NicoSitePlugin
 {
@@ -24,6 +26,37 @@ namespace NicoSitePlugin
     }
     static class Api
     {
+        public static async Task<UserLiveInfo[]> GetCurrentUserLiveId(IDataSource server, CookieContainer cc, string UserId){
+            //下記のAPIから、過去の放送や放送状況がとれる。
+            //"https://live.nicovideo.jp/front/api/v1/user-broadcast-history?providerId=userId&providerType=user&limit=1"
+            //放送したことがない場合は
+            //{"meta":{"status":200},"data":{"programsList":[],"hasNext":false,"totalCount":0}}
+            //が返ってくる
+
+            var url = $"https://live.nicovideo.jp/front/api/v1/user-broadcast-history?providerId={UserId}&providerType=user&limit=1";
+            var res = await server.GetAsync(url, cc);
+            dynamic d = JsonConvert.DeserializeObject(res);
+            if (d.meta.status != 200)
+            {
+                throw new ApiGetCommunityLivesException();//使いまわす
+            }
+
+            var lives = new List<UserLiveInfo>();
+               
+            foreach (var liveDyn in d.data.programsList)
+            {
+                var live = new UserLiveInfo
+                {
+                    Description = (string)liveDyn.program.description,
+                    LiveId = (string)liveDyn.id.value,
+                    Title = (string)liveDyn.program.title,
+                    Status = (string)liveDyn.program.schedule.status,
+                };
+                lives.Add(live);
+            }
+            return lives.ToArray();
+
+        }
         public static async Task<CommunityLiveInfo[]> GetCommunityLives(IDataSource server, CookieContainer cc, string communityId)
         {
             //以下のAPIだとON_AIRだけ取れる。
@@ -66,15 +99,23 @@ namespace NicoSitePlugin
             public long UserId { get; set; }
             public string WatchUrl { get; set; }
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="server"></param>
-        /// <param name="cc"></param>
-        /// <returns></returns>
-        /// <exception cref="NotLoggedInException">未ログインの場合</exception>
-        /// <exception cref="SpecChangedException"></exception>
-        public static async Task<MyInfo> GetMyInfo(IDataSource server, CookieContainer cc)
+        public class UserLiveInfo
+        {
+            public string LiveId { get; set; }
+            public string Title { get; set; }
+            public string Description { get; set; }
+            public string Status { get; set; }
+        }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="server"></param>
+            /// <param name="cc"></param>
+            /// <returns></returns>
+            /// <exception cref="NotLoggedInException">未ログインの場合</exception>
+            /// <exception cref="SpecChangedException"></exception>
+            public static async Task<MyInfo> GetMyInfo(IDataSource server, CookieContainer cc)
         {
             var url = "https://www.nicovideo.jp/my";
             var html = await server.GetAsync(url, cc);
@@ -134,6 +175,12 @@ namespace NicoSitePlugin
         internal static async Task<string> GetCurrentCommunityLiveId(IDataSource dataSource, string communityId, CookieContainer cc)
         {
             var lives = await GetCommunityLives(dataSource, cc, communityId);
+            return lives.FirstOrDefault(a => a.Status == "ON_AIR")?.LiveId;
+        }
+
+        internal static async Task<string> GetUserIdToCurrentLiveId(IDataSource dataSource, string UserId, CookieContainer cc)
+        {
+            var lives = await GetCurrentUserLiveId(dataSource, cc, UserId);
             return lives.FirstOrDefault(a => a.Status == "ON_AIR")?.LiveId;
         }
     }

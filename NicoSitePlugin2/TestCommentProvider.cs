@@ -11,6 +11,13 @@ using System.Collections.Concurrent;
 using System.Threading;
 using Newtonsoft.Json;
 using NicoSitePlugin.Metadata;
+using Newtonsoft.Json.Linq;
+using System.Diagnostics;
+using NicoSitePlugin2.Client;
+using Dwango.Nicolive.Chat.Service.Edge;
+using System.Linq;
+using System.Web.UI.WebControls;
+using static Dwango.Nicolive.Chat.Data.Enquete.Types;
 
 namespace NicoSitePlugin
 {
@@ -63,6 +70,8 @@ reload:
             }
             catch (Exception ex)
             {
+                _isDisconnectedExpected = true;
+                SendSystemInfo("オフライン、またはニコ生視聴ページにアクセスできません。", InfoType.Error);
                 _logger.LogException(ex, "", $"input:{input}, browser:{browserProfile.Type}");
             }
             _dataProps = null;
@@ -85,6 +94,24 @@ reload:
         {
 check:
             var currentLiveId = await Api.GetCurrentChannelLiveId(_server, channelUrl.ChannelScreenName);
+            if (currentLiveId != null)
+            {
+                return currentLiveId;
+            }
+            else
+            {
+                RaiseMetadataUpdated(new TestMetadata
+                {
+                    Title = "（次の配信が始まるまで待機中...）",
+                });
+                await Task.Delay(30 * 1000, _disconnectCts.Token);
+                goto check;
+            }
+        }
+        private async Task<string> GetUserLiveId(UserId UserId, CookieContainer cc)
+        {
+    check:
+            var currentLiveId = await Api.GetUserIdToCurrentLiveId(_server, UserId.Raw, cc);
             if (currentLiveId != null)
             {
                 return currentLiveId;
@@ -139,6 +166,10 @@ check:
             {
                 vid = liveId.Raw;
             }
+            else if (input is UserId UserId)
+            {
+                vid = await GetUserLiveId(UserId, cc);
+            }
             else
             {
                 throw new InvalidOperationException("bug");
@@ -161,12 +192,14 @@ check:
                 }
                 return;
             }
+
             _vposBaseTime = Common.UnixTimeConverter.FromUnixTime(_dataProps.VposBaseTime);
             _localTime = DateTime.Now;
             RaiseMetadataUpdated(new TestMetadata
             {
                 Title = _dataProps.Title,
             });
+
 
             var metaTask = _metaProvider.ReceiveAsync(_dataProps.WebsocketUrl);
             _tasks.Add(metaTask);
@@ -497,6 +530,7 @@ check:
         Metadata.Room _room;
         DataProps _dataProps;
         private bool _disposedValue;
+        private MessageServerClient? _messageServerClient = null;
 
         private void MetaProvider_Received(object sender, Metadata.IMetaMessage e)
         {
@@ -543,10 +577,20 @@ check:
                         });
                         break;
                     case Metadata.Disconnect disconnect:
-                        SendSystemInfo($"メタデータサーバーとの接続が切断されました{Environment.NewLine}原因:{disconnect.Reason}", InfoType.Notice);
+                        SendSystemInfo($"コメントデータサーバーとの接続が切断されました{Environment.NewLine}原因:{disconnect.Reason}", InfoType.Notice);
                         //Disconnect();
                         break;
                     case Metadata.ServerTime serverTime:
+                        break;
+                    case Metadata.MessageServer messageServer:
+                        if(_messageServerClient != null)
+                        {
+                           _messageServerClient.disconnect();
+                        }
+                        Debug.WriteLine(messageServer.MessageServerUrl);
+                        _messageServerClient = new MessageServerClient(messageServer.MessageServerUrl, ProcessChunkedEntry);
+                        var task = _messageServerClient.doConnect();
+                        _toAdd.Add(task);
                         break;
                 }
             }
@@ -555,6 +599,373 @@ check:
 
             }
         }
+
+        public void RemoveDisconnectedServers()
+        {
+            // isdisconnectがtrueの要素を削除
+            _segmentServers = _segmentServers.Where(server => !server.isDisconnect).ToList();
+        }
+
+        public List<SegmentServerClient>? _segmentServers = null;
+
+        public async Task ProcessChunkedEntry(ChunkedEntry entry)
+        {
+            if(_messageServerClient == null)
+            {
+                return;
+            }
+            if (entry.Next != null)
+            {
+                //&at=の値を更新
+                _messageServerClient.NextStreamAt = entry.Next.At.ToString();
+            }
+            else if(entry.Previous != null)
+            {
+                //コメント取得に関係ないので無視
+            }
+            else if (entry.Backward != null)
+            {
+                //コメント取得に関係ないので無視
+            }
+            else if (entry.Segment != null)
+            {
+                string Uri = entry.Segment.Uri;
+                if(Uri == null)
+                {
+                    await Task.CompletedTask;
+                }
+                if(_segmentServers == null)
+                {
+                    _segmentServers = new List<SegmentServerClient> ();
+                }
+
+                RemoveDisconnectedServers();
+
+                var segmentServer = new SegmentServerClient(Uri, ProcessChunkedMessage);
+                _segmentServers.Add(segmentServer);
+                var task = segmentServer.doConnect();
+                _toAdd.Add(task);
+                _toAdd.RemoveAll(task => task.IsCompleted);//使い終わったSegmentServerClientがメモリにたまっていくので消す
+            }
+            await Task.CompletedTask;
+        }
+
+        public async Task ProcessChunkedMessage(ChunkedMessage message)
+        {
+            if (_messageServerClient == null)
+            {
+                return;
+            }
+            if (message.Message?.SimpleNotification != null)
+            {
+                var notification = message.Message?.SimpleNotification;
+                //info
+                if (notification.ProgramExtended != null && notification.ProgramExtended != "")
+                {
+                    var contents = notification.ProgramExtended;
+
+                    var date = Now();
+                    if (message.Meta?.At != null)
+                    {
+                        date = fixDateTime(message.Meta.At.ToDateTime());
+                    }
+
+                    var comment = new NicoInfo(contents)
+                    {
+                        Text = contents,
+                        PostedAt = date
+                    };
+                    var metadata = new InfoMessageMetadata(comment, _options, _siteOptions)
+                    {
+                        IsInitialComment = _isInitialCommentsReceiving,
+                        SiteContextGuid = SiteContextGuid,
+                    };
+                    var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
+                    RaiseMessageReceived(context);
+                }
+                else if (notification.Ichiba != null && notification.Ichiba != "")
+                {
+                    var Ichiba = "【放送ネタ】" + notification.Ichiba;
+
+                    var date = Now();
+                    if (message.Meta?.At != null)
+                    {
+                        date = fixDateTime(message.Meta.At.ToDateTime());
+                    }
+
+                    var comment = new NicoSpi(Ichiba)
+                    {
+                        Text = notification.Ichiba,
+                        PostedAt = date,
+                    };
+                    var metadata = new SpiMessageMetadata(comment, _options, _siteOptions)
+                    {
+                        IsInitialComment = _isInitialCommentsReceiving,
+                        SiteContextGuid = SiteContextGuid,
+                    };
+                    var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
+                    RaiseMessageReceived(context);
+                }
+                else if (notification.RankingIn != null && notification.RankingIn != "")
+                {
+                    var contents = notification.RankingIn;
+
+                    var date = Now();
+                    if (message.Meta?.At != null)
+                    {
+                        date = fixDateTime(message.Meta.At.ToDateTime());
+                    }
+                    var comment = new NicoInfo(contents)
+                    {
+                        Text = contents,
+                        PostedAt = date,
+                    };
+                    var metadata = new InfoMessageMetadata(comment, _options, _siteOptions)
+                    {
+                        IsInitialComment = _isInitialCommentsReceiving,
+                        SiteContextGuid = SiteContextGuid,
+                    };
+                    var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
+                    RaiseMessageReceived(context);
+                }
+                else if (notification.Visited != null && notification.Visited != "")
+                {
+                    var contents = notification.Visited;
+                    var date = Now();
+                    if (message.Meta?.At != null)
+                    {
+                        date = fixDateTime(message.Meta.At.ToDateTime());
+                    }
+                    var comment = new NicoInfo(contents)
+                    {
+                        Text = contents,
+                        PostedAt = date
+                    };
+                    var metadata = new InfoMessageMetadata(comment, _options, _siteOptions)
+                    {
+                        IsInitialComment = _isInitialCommentsReceiving,
+                        SiteContextGuid = SiteContextGuid,
+                    };
+                    var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
+                    RaiseMessageReceived(context);
+                }
+            }
+            if(message.Message?.Gift != null)
+            {
+                SendSystemInfo("ギフトを検知しましたが、このバージョンでは対応していません", InfoType.Error);
+                var contents = "ギフトを検知しました";
+                var comment = new NicoInfo(contents)
+                {
+                    Text = contents,
+                    PostedAt = Now(),
+                };
+                var metadata = new InfoMessageMetadata(comment, _options, _siteOptions)
+                {
+                    IsInitialComment = _isInitialCommentsReceiving,
+                    SiteContextGuid = SiteContextGuid,
+                };
+                var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
+                RaiseMessageReceived(context);
+            }
+            if (message.Message?.Nicoad != null)
+            {
+                SendSystemInfo("ニコニ広告を検知しましたが、このバージョンでは対応していません", InfoType.Error);
+                var contents = "ニコニ広告を検知しました";
+                var comment = new NicoInfo(contents)
+                {
+                    Text = contents,
+                    PostedAt = Now(),
+                };
+                var metadata = new InfoMessageMetadata(comment, _options, _siteOptions)
+                {
+                    IsInitialComment = _isInitialCommentsReceiving,
+                    SiteContextGuid = SiteContextGuid,
+                };
+                var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
+                RaiseMessageReceived(context);
+            }
+            if(message.State != null)
+            {
+                var announce = message.State?.Marque?.Display?.OperatorComment; //放送者コメント
+                if(announce != null)
+                {
+                    var contents = announce.Content;
+                    if (announce.Link != null && announce.Link != "")
+                    {
+                        contents = announce.Content + "(" + announce.Link + ")";
+                    }
+                    var comment = new NicoInfo(contents)
+                    {
+                        Text = contents,
+                        PostedAt = Now(),
+                    };
+                    var metadata = new InfoMessageMetadata(comment, _options, _siteOptions)
+                    {
+                        IsInitialComment = _isInitialCommentsReceiving,
+                        SiteContextGuid = SiteContextGuid,
+                    };
+                    var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
+                    RaiseMessageReceived(context);
+                }
+
+                if (message.State.Enquete != null)
+                {
+                    var vote = message.State.Enquete;
+                    if(!vote.Status.Equals(Status.Closed)) //0 = closedは送られてこないので無視
+                    {
+                        var question = vote.Question;
+                        var status = "result";
+                        if (vote.Status.Equals(Status.Poll))
+                        {
+                            status = "start";
+                        }
+                        var contents = "/vote " + status + " " + question + " ";
+
+
+                        foreach(var item in vote.Choices)
+                        {
+                            var description = item.Description;
+                            if (status == "result")
+                            {
+                                contents += description + "("+ ToPercentage(item.PerMille) + ") ";
+                            }else{
+                                contents += description + " ";
+                            }
+                           
+                           
+                        }
+
+                        contents = contents.Trim();
+
+                        var date = Now();
+                        if (message.Meta?.At != null)
+                        {
+                            date = fixDateTime(message.Meta.At.ToDateTime());
+                        }
+
+                        var comment = new NicoInfo(contents)
+                        {
+                            Text = contents,
+                            PostedAt = date,
+                        };
+                        var metadata = new InfoMessageMetadata(comment, _options, _siteOptions)
+                        {
+                            IsInitialComment = _isInitialCommentsReceiving,
+                            SiteContextGuid = SiteContextGuid,
+                        };
+                        var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
+                        RaiseMessageReceived(context);
+                    }
+                }
+
+            }
+            if (message.Message?.Chat != null)
+            {
+                var chat = message.Message.Chat;
+                var content = chat.Content;
+                var vpos = chat.Vpos;
+                //string? userId = null;
+                //if (chat.RawUserId != 0)
+                //{
+                //    userId = chat.RawUserId.ToString();
+                //}
+                var name = chat.HashedUserId.Substring(2);//a:
+                var anonymity = true;
+                var no = chat.No;
+                if (chat.Name != null&&chat.Name != "")
+                {
+                    name = chat.Name + "(" + chat.RawUserId + ")";
+                    anonymity = false;
+                }
+                var isPremium = chat.AccountStatus == 0 ? "normal" : "premium";
+                if(isPremium == "premium")
+                {
+                    name = "a:premium:" + name;
+                }
+                else
+                {
+                    name = "a:" +  name;
+                }
+                var at = Now();
+                if (message.Meta?.At != null)
+                {
+                    at = fixDateTime(message.Meta.At.ToDateTime());
+                }
+
+                string? thumbNailUrl = null;
+                if (chat.RawUserId != 0)
+                {
+                    thumbNailUrl = GetThumbnail(chat.RawUserId.ToString());
+                }
+               
+
+                var comment = new NicoComment("")
+                {
+                    ChatNo = chat.No,
+                    Id = chat.No.ToString(),
+                    Is184 = anonymity,
+                    PostedAt = at,
+                    Text = content,
+                    UserId = name,
+                    UserName = name,
+                    ThumbnailUrl = thumbNailUrl,
+                };
+
+                var user = GetUser(name);
+                bool isFirstComment;
+                if (_userCommentCountDict.ContainsKey(name))
+                {
+                    _userCommentCountDict[name]++;
+                    isFirstComment = false;
+                }
+                else
+                {
+                    _userCommentCountDict.AddOrUpdate(name, 1, (s, n) => n);
+                    isFirstComment = true;
+                }
+
+                var metadata = new CommentMessageMetadata(comment, _options, _siteOptions, user, this, isFirstComment)
+                {
+                    IsInitialComment = _isInitialCommentsReceiving,
+                    SiteContextGuid = SiteContextGuid,
+                };
+
+                var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
+                RaiseMessageReceived(context);
+            }
+
+            await Task.CompletedTask;
+        }
+        public DateTime fixDateTime(DateTime utcTime)
+        {
+            return utcTime;//不要だったけど放置
+        }
+
+        public string ToPercentage(int? number)
+        {
+            if (number == null||number == 0)
+            {
+                return "0.0%";
+            }
+
+            // パーセント計算
+            double percentage = ((double)number / 1000) * 100;
+
+            // 結果を小数点以下1桁でフォーマット
+            return $"{percentage:F1}%";
+        }
+
+        public DateTime Now()
+        {
+            var utcNow = DateTime.UtcNow;
+
+            // 日本標準時（JST）のタイムゾーン情報を取得
+            var jstZone = TimeZoneInfo.FindSystemTimeZoneById("Tokyo Standard Time");
+
+            // UTC日時を日本標準時（JST）に変換
+            return TimeZoneInfo.ConvertTimeFromUtc(utcNow, jstZone);
+        }
+
         DateTime? _vposBaseTime;
         DateTime? _localTime;
         /// <summary>
@@ -566,6 +977,16 @@ check:
             _disconnectCts.Cancel();
             _metaProvider?.Disconnect();
             _chatProvider?.Disconnect();
+            _messageServerClient?.disconnect();
+            _messageServerClient = null;
+            if (_segmentServers != null)
+            {
+                foreach (var server in _segmentServers)
+                {
+                    server.disconnect();
+                }
+                _segmentServers = new List<SegmentServerClient>();
+            }
         }
 
         public override async Task<ICurrentUserInfo> GetCurrentUserInfo(IBrowserProfile browserProfile)

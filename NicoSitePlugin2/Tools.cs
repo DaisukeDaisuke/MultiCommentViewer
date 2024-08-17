@@ -25,10 +25,27 @@ namespace NicoSitePlugin
             {
                 return new LiveId(input);
             }
+            else if(isUserPage(input))
+            {
+                var userId = ExtractUserPage(input);
+                return new UserId(userId);
+            }
             else
             {
                 return new InvalidInput(input);
             }
+        }
+
+        public static bool isUserPage(string input)
+        {
+            return Regex.IsMatch(input, "nicovideo\\.jp/user/(\\d+)");
+        }
+
+        public static string ExtractUserPage(string input)
+        {
+            var match = Regex.Match(input, "nicovideo\\.jp/user/(\\d+)");
+            if (!match.Success) return null;
+            return match.Groups[1].Value;
         }
 
         private static string ExtractCommunityIdFromUrl(string input)
