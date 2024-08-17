@@ -40,13 +40,16 @@ namespace NicoSitePlugin2.Client
 
         public bool disconnect()
         {
-            _streamReceiver.StopReceiving();
+            _streamReceiver?.StopReceiving();
             return true;
         }
 
         public async Task ProcessRawData(byte[] data)
         {
-
+            if (_streamReceiver == null)
+            {
+                return;
+            }
             // データを受信するたびに処理
             Console.WriteLine($"Received {data.Length} bytes.");
 
