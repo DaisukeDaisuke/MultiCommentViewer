@@ -869,7 +869,11 @@ check:
                 //{
                 //    userId = chat.RawUserId.ToString();
                 //}
-                var name = chat.HashedUserId.Substring(2);//a:
+                var name = "";
+                if (chat.HashedUserId != null && chat.HashedUserId != "")
+                {
+                    name = chat.HashedUserId.Substring(2);//a:
+                }
                 var anonymity = true;
                 var no = chat.No;
                 if (chat.Name != null&&chat.Name != "")
