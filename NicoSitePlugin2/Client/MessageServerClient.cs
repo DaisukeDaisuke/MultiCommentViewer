@@ -32,7 +32,11 @@ namespace NicoSitePlugin2.Client
             _uri = uri;
             _processData = processData;
             stream = new BinaryStream();
-            _streamReceiver = new StreamReceiver(ProcessRawData);
+            var headers = new Dictionary<string, string>
+            {
+                { "header", "u=1, i" }
+            };
+            _streamReceiver = new StreamReceiver(ProcessRawData, headers);
 
         }
 

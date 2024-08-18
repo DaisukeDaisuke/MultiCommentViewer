@@ -21,7 +21,8 @@ namespace NicoSitePlugin2.Client
         public SegmentServerClient(string uri, Func<ChunkedMessage, Task> processData)
         {
             _uri = uri;
-            _streamReceiver = new StreamReceiver(ProcessRawData);
+            var headers = new Dictionary<string, string>();
+            _streamReceiver = new StreamReceiver(ProcessRawData, headers);
             stream = new BinaryStream();
             _processData = processData;
 

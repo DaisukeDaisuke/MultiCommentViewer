@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,11 +16,16 @@ namespace NicoSitePlugin2.Client
         private CancellationTokenSource _cancellationTokenSource;
         private List<byte> _buffer;
         private Func<byte[], Task> _processData;
-        public StreamReceiver(Func<byte[], Task> processData)
+        public StreamReceiver(Func<byte[], Task> processData, Dictionary<string, string> headers)
         {
             _httpClient = new HttpClient();
             _processData = processData;
             _buffer = new List<byte>();
+
+            foreach (var header in headers)
+            {
+                _httpClient.DefaultRequestHeaders.Add(header.Key, header.Value);
+            }
         }
         public async Task ReceiveAsync(string url)
         {
