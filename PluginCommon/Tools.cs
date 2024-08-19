@@ -56,6 +56,10 @@ namespace PluginCommon
                 comment = nicoComment.Text;
                 name = nicoComment.UserName;
             }
+            else if (message is NicoSitePlugin.INicoInfo NicoInfo)
+            {
+                comment = NicoInfo.Text;
+            }
             else if (message is NicoSitePlugin.INicoGift nicoItem)
             {
                 comment = nicoItem.Text;
