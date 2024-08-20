@@ -1090,7 +1090,7 @@ namespace MultiCommentViewer
         }
         private string GetUserAgent()
         {
-            return $"{GetAppName()}/{GetVersionNumber()} contact-> twitter.com/kv510k";
+            return $"{GetAppName()}/{GetVersionNumber()} (contact, twitter.com/kv510k, Fork author, DaisukeDaisuke/MultiCommentViewer)";
         }
         public string Title
         {
