@@ -18,7 +18,6 @@ jobs:
     env:
       Solution_Name: MultiCommentViewer.sln
       Configuration: Release
-      Output_Directory: Output         # ビルド成果物を出力するディレクトリ名
 
     steps:
     - name: Checkout code
@@ -44,9 +43,9 @@ jobs:
 
     - name:  copy files
       run: |
-        copy ".\BouyomiPlugin\bin\release\*" "$(Output_Directory)\Release\plugins\Bouyomi"
-        copy ".\CommentGeneratorPlugin\bin\release\*" "$(Output_Directory)\Release\plugins\CommentGenerator"
-        copy ".\YoyakuPlugin\bin\release\*" "$(Output_Directory)\Release\plugins\Yoyaku"
+        copy ".\BouyomiPlugin\bin\release\*" ".\Output\Release\plugins\Bouyomi"
+        copy ".\CommentGeneratorPlugin\bin\release\*" ".\Output\Release\plugins\CommentGenerator"
+        copy ".\YoyakuPlugin\bin\release\*" ".\Output\Release\plugins\Yoyaku"
        
     - run: Compress-Archive -Path ./Output/Release/* -Destination 'MultiCommentViewer_v${{ github.event.inputs.tagname }}_stable.zip'
 
