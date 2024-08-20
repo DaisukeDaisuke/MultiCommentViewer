@@ -12,7 +12,6 @@ jobs:
 
     env:
       Configuration: Release
-      Solution_Name: MultiCommentViewer.sln  # 置き換え: あなたのソリューションファイル名
       Output_Directory: build_output         # ビルド成果物を出力するディレクトリ名
 
     steps:
@@ -31,10 +30,10 @@ jobs:
       run: dotnet restore $env:Solution_Name
 
     - name: Build solution
-      run: dotnet build $env:Solution_Name --configuration $env:Configuration --output $env:Output_Directory
+      run: dotnet build ./MultiCommentViewer/MultiCommentViewer.csproj --configuration $env:Configuration
 
     - name: Publish artifacts
       uses: actions/upload-artifact@v3
       with:
         name: DesktopApp
-        path: ${{ env.Output_Directory }}
+        path: ./Output
