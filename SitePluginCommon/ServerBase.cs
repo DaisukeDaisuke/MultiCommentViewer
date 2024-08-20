@@ -59,6 +59,55 @@ namespace SitePluginCommon
                 return ret;
             }
         }
+
+
+        protected async Task<HttpResponseMessage> PutInternalAsync(HttpOptions options, HttpContent content)
+        {
+            if (string.IsNullOrEmpty(options.Url))
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            var handler = new HttpClientHandler();
+            if (options.Cc != null)
+            {
+                handler.UseCookies = true;
+                handler.CookieContainer = options.Cc;
+            }
+            HttpResponseMessage res;
+            using (var client = new HttpClient(handler))
+            {
+                if (!string.IsNullOrEmpty(options.UserAgent))
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", options.UserAgent);
+                }
+                if (options.AcceptLanguages != null)
+                {
+                    foreach (var la in options.AcceptLanguages)
+                    {
+                        client.DefaultRequestHeaders.AcceptLanguage.Add(la);
+                    }
+                }
+                if (options.Headers != null)
+                {
+                    foreach (var kv in options.Headers)
+                    {
+                        if (kv.Key.ToLower() == "authorization")
+                        {
+                            var arr = kv.Value.Split(' ');
+                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(arr[0], arr[1]);
+                        }
+                        else
+                        {
+                            client.DefaultRequestHeaders.Add(kv.Key, kv.Value);
+                        }
+                    }
+                }
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+                res = await client.PutAsync(options.Url, content);
+            }
+            return res;
+        }
         /// <summary>
         /// 
         /// </summary>

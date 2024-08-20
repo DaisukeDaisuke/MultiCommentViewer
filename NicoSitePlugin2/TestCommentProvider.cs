@@ -144,6 +144,7 @@ check:
                 goto check;
             }
         }
+        string _LvId;
         CookieContainer _cc;
         public async Task ConnectInternalAsync(IInput input, IBrowserProfile browserProfile)
         {
@@ -174,6 +175,7 @@ check:
             {
                 throw new InvalidOperationException("bug");
             }
+            _LvId = vid;
             var url = "https://live2.nicovideo.jp/watch/" + vid;
 
 
@@ -195,6 +197,12 @@ check:
 
             _vposBaseTime = Common.UnixTimeConverter.FromUnixTime(_dataProps.VposBaseTime);
             _localTime = DateTime.Now;
+            _isBroadcaster = _dataProps.IsBroadcaster;
+            _isLoggedIn = _dataProps.IsLoggedIn;
+            _broadcastRequestUrl = _dataProps.BroadcastRequestUrl;
+            _BeginTime = Common.UnixTimeConverter.FromUnixTime(_dataProps.BeginTime);
+            _CsrfToken = _dataProps.csrfToken;
+
             RaiseMetadataUpdated(new TestMetadata
             {
                 Title = _dataProps.Title,
@@ -254,6 +262,25 @@ check:
             }
             return;
         }
+
+        static float CalculateTimeDifference(DateTime begin, DateTime end, float diff = 0.0f)
+        {
+            // 差分を計算
+            TimeSpan interval = end - begin;
+
+            // 差分を秒単位で取得し、小数点以下も含める
+            double differenceInSeconds = interval.TotalSeconds;
+
+            // 正負を判定
+            if (begin < end)
+            {
+                differenceInSeconds = -differenceInSeconds;
+            }
+
+            // 差分と追加の秒数を加算し、小数点以下2桁まで丸める
+            return (float)Math.Round(differenceInSeconds + diff, 2);
+        }
+
         /// <summary>
         /// 初期コメント取得中か
         /// </summary>
@@ -589,6 +616,7 @@ check:
                         }
                         break;
                     case Metadata.ServerTime serverTime:
+                        _DiffTime = CalculateTimeDifference(serverTime.CurrentMs, DateTime.Now, 0.0f);
                         break;
                     case Metadata.MessageServer messageServer:
                         if(_messageServerClient != null)
@@ -599,6 +627,18 @@ check:
                         _messageServerClient = new MessageServerClient(messageServer.MessageServerUrl, ProcessChunkedEntry);
                         var task = _messageServerClient.doConnect();
                         _toAdd.Add(task);
+                        break;
+                    case Metadata.ErrorMessage errorMessage:
+                        if(errorMessage.reason == "COMMENT_POST_NOT_ALLOWED")
+                        {
+                            SendSystemInfo($"未ログインのためコメントをコメント投稿が拒否されました。ブラウザを起動している場合終了し、コメビュを再起動してください", InfoType.Error);
+                            break;
+                        }
+                        else if(errorMessage.reason == "INVALID_MESSAGE")
+                        {
+                            SendSystemInfo($"[ニコ生]サイトの仕様変更を検知しました。", InfoType.Error);
+                        }//TODO: CONNECT_ERRORも処理する
+
                         break;
                 }
             }
@@ -1040,6 +1080,12 @@ check:
 
         DateTime? _vposBaseTime;
         DateTime? _localTime;
+        bool _isBroadcaster = false;
+        bool _isLoggedIn = false;
+        string _broadcastRequestUrl;
+        DateTime? _BeginTime;
+        float _DiffTime = 0;
+        string _CsrfToken;
         /// <summary>
         /// 意図的な切断
         /// </summary>
@@ -1095,11 +1141,19 @@ check:
 
         Task INicoCommentProvider.PostCommentAsync(string comment, bool is184, string color, string size, string position)
         {
-            var elapsed = DateTime.Now.AddHours(-9) - _vposBaseTime.Value;
-            var ms = elapsed.TotalMilliseconds;
-            var vpos = (long)Math.Round(ms / 10);
-            var postComment = new PostComment(comment, vpos, is184, color, size, position);
-            _metaProvider.Send(postComment);
+            if (!_isBroadcaster)
+            {
+                var elapsed = DateTime.Now.AddHours(-9) - _vposBaseTime.Value;
+                var ms = elapsed.TotalMilliseconds + _DiffTime;
+                var vpos = (long)Math.Round(ms / 10);
+                var postComment = new PostComment(comment, vpos, is184, color, size, position);
+                _metaProvider.Send(postComment);
+            }
+            else
+            {
+                //ここでは_isLoggedInは絶対にtrueのはず。なのでチェックは不要
+                return Api.PostBroadcasterComment(_server, _cc, _broadcastRequestUrl, _LvId, comment, _CsrfToken);
+            }
             return Task.CompletedTask;
         }
         public TestCommentProvider(ICommentOptions options, INicoSiteOptions siteOptions, IDataSource server, ILogger logger, IUserStoreManager userStoreManager) : base(logger, options)

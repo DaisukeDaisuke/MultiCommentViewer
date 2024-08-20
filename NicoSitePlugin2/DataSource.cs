@@ -1,6 +1,9 @@
 ﻿using SitePluginCommon;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.Remoting.Messaging;
+using System.Text;
 using System.Threading.Tasks;
 namespace NicoSitePlugin
 {
@@ -28,5 +31,21 @@ namespace NicoSitePlugin
         {
             _userAgent = userAgent;
         }
+
+
+        public async Task<string> PutAsync(string url, CookieContainer cc, string jsonString, Dictionary<string, string> headers)
+        {
+            var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
+            var result = await PutInternalAsync(new HttpOptions
+            {
+                Url = url,
+                Cc = cc,
+                UserAgent = _userAgent,
+                Headers = headers,
+            }, content);
+            var str = await result.Content.ReadAsStringAsync();
+            return str;
+        }
+
     }
 }

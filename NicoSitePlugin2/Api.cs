@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using static Google.Protobuf.WellKnownTypes.Field.Types;
 using System.Diagnostics;
+using System.Security.Policy;
 
 namespace NicoSitePlugin
 {
@@ -26,6 +27,16 @@ namespace NicoSitePlugin
     }
     static class Api
     {
+        public static async Task PostBroadcasterComment(IDataSource server, CookieContainer cc, string urlbase, string LvId, string text, string csrfToken)
+        {
+            var headers = new Dictionary<string, string>
+            {
+                { "X-Public-Api-Token", csrfToken },
+            };
+            string jsonString = "{\"text\":\""+ text.Replace("\"", "\\\"") + "\",\"name\":\"\",\"isPermanent\":false,\"command\":\"\"}";
+            var res = await server.PutAsync(urlbase + "unama/api/v3/programs/" + LvId + "/broadcaster_comment", cc, jsonString, headers);
+        }
+
         public static async Task<UserLiveInfo[]> GetCurrentUserLiveId(IDataSource server, CookieContainer cc, string UserId){
             //下記のAPIから、過去の放送や放送状況がとれる。
             //"https://live.nicovideo.jp/front/api/v1/user-broadcast-history?providerId=userId&providerType=user&limit=1"

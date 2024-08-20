@@ -81,6 +81,29 @@ namespace NicoSitePlugin
                 return (bool)_d.user.isLoggedIn;
             }
         }
+        public bool IsBroadcaster
+        {
+            get
+            {
+                return (bool)_d.user.isBroadcaster;
+            }
+        }
+
+        public string BroadcastRequestUrl
+        {
+            get
+            {
+                return (string)_d.site.broadcastRequest.apiBaseUrl ?? "https://live2.nicovideo.jp/";
+            }
+        }
+
+        public string csrfToken
+        {
+            get
+            {
+                return (string)_d.site.relive.csrfToken;
+            }
+        }
         public DataProps(string json)
         {
             Raw = json;
