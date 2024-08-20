@@ -1,11 +1,12 @@
 name: .NET Desktop App Build
 
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
-
+  workflow_dispatch:
+    inputs:
+      tagname:
+        description: 'tagname'
+        required: true
+        default: '0.6.35'
 jobs:
   build:
     runs-on: windows-latest
@@ -32,8 +33,22 @@ jobs:
     - name: Build solution
       run: dotnet build ./MultiCommentViewer/MultiCommentViewer.csproj --configuration $env:Configuration
 
+    - name: Archive Release
+      uses: thedoctor0/zip-release@0.7.5
+      with:
+        type: 'zip'
+        filename: 'MultiCommentViewer_v${{ github.event.inputs.tagname }}_stable.zip'
+        directory: ./Output/Release
+
+    - name: Upload Release
+      uses: ncipollo/release-action@v1.12.0
+      with:
+        artifacts: 'MultiCommentViewer_v${{ github.event.inputs.tagname }}_stable.zip'
+        tag: ${{ github.event.inputs.tagname }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Publish artifacts
       uses: actions/upload-artifact@v3
       with:
         name: DesktopApp
-        path: ./Output
+        path: 'MultiCommentViewer_v${{ github.event.inputs.tagname }}_stable.zip'
