@@ -43,9 +43,9 @@ jobs:
 
     - name:  copy files
       run: |
-        copy ".\BouyomiPlugin\bin\release\*" ".\Output\Release\plugins\Bouyomi"
-        copy ".\CommentGeneratorPlugin\bin\release\*" ".\Output\Release\plugins\CommentGenerator"
-        copy ".\YoyakuPlugin\bin\release\*" ".\Output\Release\plugins\Yoyaku"
+        copy ".\BouyomiPlugin\bin\Release\*" ".\Output\Release\plugins\Bouyomi"
+        copy ".\CommentGeneratorPlugin\bin\Release\*" ".\Output\Release\plugins\CommentGenerator"
+        copy ".\YoyakuPlugin\bin\Release\*" ".\Output\Release\plugins\Yoyaku"
        
     - run: Compress-Archive -Path ./Output/Release/* -Destination 'MultiCommentViewer_v${{ github.event.inputs.tagname }}_stable.zip'
 
