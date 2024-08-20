@@ -716,6 +716,12 @@ check:
                 //string base64String = "Cj4KJEVoa0tFZ25IY21ka0pWbVJBUkYwU2RSMEpPMFVyaENPdC1ZSxIMCOSD+7UGENDE/tgBGggKBgjMyOOkASJJEkcKD+OCouODs+OCseODvOODiBIQCgzjg6njg7zjg6Hjg7MYABINCgnjgYbjganjgpMYABIRCgzjgZ3jgYbjgoHjgpMY6AcYAg==";
                 //投票結果非表示(エラーなく無視する必要がある)
                 //string base64String = "Cj4KJEVoa0tFZ2x4Zng2MkhGbVJBUkdkQzVvQ0FGOUlxUkNPdC1ZSxIMCKv/+rUGEND7tYYCGggKBgjMyOOkASICEgA=";
+                //"「湊ぱこらさん」が引用を開始しました"
+                //string base64String ="Cj4KJEVoa0tFZ21hY1V2VmFHcVJBUkdyTkg2LUdiREdyaENfbS1FTRIMCMTajLYGEICl6b8DGggKBgjKlOWkARI6OjgSNuOAjOa5iuOBseOBk+OCieOBleOCk+OAjeOBjOW8leeUqOOCkumWi+Wni+OBl+OBvuOBl+OBnw==";
+                //「湊ぱこらさん」が引用を終了しました
+                //string base64String ="Cj4KJEVoa0tFZ21uZW9Qd2FXcVJBUkY3dE1xNUxHSDVyUkNfbS1FTRIMCI3bjLYGELjUt9MBGggKBgjKlOWkARI6OjgSNuOAjOa5iuOBseOBk+OCieOBleOCk+OAjeOBjOW8leeUqOOCkue1guS6huOBl+OBvuOBl+OBnw==";
+
+
 
                 //Base64文字列をbyte[] に変換
                 //byte[] byteArray = Convert.FromBase64String(base64String);
@@ -812,6 +818,26 @@ check:
                 else if (notification.Visited != null && notification.Visited != "")
                 {
                     var contents = notification.Visited;
+                    var date = Now();
+                    if (message.Meta?.At != null)
+                    {
+                        date = fixDateTime(message.Meta.At.ToDateTime());
+                    }
+                    var comment = new NicoInfo(contents)
+                    {
+                        Text = contents,
+                        PostedAt = date
+                    };
+                    var metadata = new InfoMessageMetadata(comment, _options, _siteOptions)
+                    {
+                        IsInitialComment = _isInitialCommentsReceiving,
+                        SiteContextGuid = SiteContextGuid,
+                    };
+                    var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
+                    RaiseMessageReceived(context);
+                }else if (notification.Quote != null&&notification.Quote != "")
+                {
+                    var contents = notification.Quote;
                     var date = Now();
                     if (message.Meta?.At != null)
                     {
