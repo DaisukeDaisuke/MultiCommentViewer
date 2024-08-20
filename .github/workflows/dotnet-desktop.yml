@@ -16,6 +16,7 @@ jobs:
     runs-on: windows-latest
 
     env:
+      Solution_Name: MultiCommentViewer.sln
       Configuration: Release
       Output_Directory: Output         # ビルド成果物を出力するディレクトリ名
 
