@@ -8,6 +8,6 @@ namespace NicoSitePlugin
     {
         Task<string> GetAsync(string url, CookieContainer cc);
         Task<string> GetAsync(string url);
-        Task<string> PutAsync(string url, CookieContainer cc, string jsonString, Dictionary<string, string> headers);
+        Task<string> PutJsonAsync(string url, string jsonString, CookieContainer cc, Dictionary<string, string> headers);
     }
 }

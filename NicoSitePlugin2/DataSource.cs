@@ -33,7 +33,7 @@ namespace NicoSitePlugin
         }
 
 
-        public async Task<string> PutAsync(string url, CookieContainer cc, string jsonString, Dictionary<string, string> headers)
+        public async Task<string> PutJsonAsync(string url, string jsonString, CookieContainer cc,  Dictionary<string, string> headers)
         {
             var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
             var result = await PutInternalAsync(new HttpOptions

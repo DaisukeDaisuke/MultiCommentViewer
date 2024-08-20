@@ -34,7 +34,7 @@ namespace NicoSitePlugin
                 { "X-Public-Api-Token", csrfToken },
             };
             string jsonString = "{\"text\":\""+ text.Replace("\"", "\\\"") + "\",\"name\":\"\",\"isPermanent\":false,\"command\":\"\"}";
-            var res = await server.PutAsync(urlbase + "unama/api/v3/programs/" + LvId + "/broadcaster_comment", cc, jsonString, headers);
+            var res = await server.PutJsonAsync(urlbase + "unama/api/v3/programs/" + LvId + "/broadcaster_comment", jsonString, cc, headers);
         }
 
         public static async Task<UserLiveInfo[]> GetCurrentUserLiveId(IDataSource server, CookieContainer cc, string UserId){
