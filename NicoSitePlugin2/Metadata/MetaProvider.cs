@@ -33,7 +33,7 @@ namespace NicoSitePlugin.Metadata
 
         private void Ws_Opened(object sender, EventArgs e)
         {
-            var s = "{\"type\":\"startWatching\",\"data\":{\"stream\":{\"quality\":\"high\",\"protocol\":\"hls\",\"latency\":\"low\",\"chasePlay\":false},\"room\":{\"protocol\":\"webSocket\",\"commentable\":true},\"reconnect\":false}}";
+            var s = "{\"type\":\"startWatching\",\"data\":{\"stream\":{\"quality\":\"abr\",\"protocol\":\"hls\",\"latency\":\"low\",\"chasePlay\":false},\"room\":{\"protocol\":\"webSocket\",\"commentable\":true},\"reconnect\":false}}";
             try
             {
                 _ws.Send(s);
