@@ -14,17 +14,18 @@ namespace NicoSitePlugin2.Client
         private StreamReceiver? _streamReceiver;
         public bool isDisconnect { get; set; } = false;
         private BinaryStream? stream;
-        private Func<ChunkedMessage, Task>? _processData;
-
+        private Func<ChunkedMessage, bool, Task>? _processData;
+        private bool _isInitialCommentsReceiving = false;
 
         // コンストラクタ
-        public SegmentServerClient(string uri, Func<ChunkedMessage, Task> processData)
+        public SegmentServerClient(string uri, Func<ChunkedMessage, bool, Task> processData, bool isInitialCommentsReceiving)
         {
             _uri = uri;
             var headers = new Dictionary<string, string>();
             _streamReceiver = new StreamReceiver(ProcessRawData, headers);
             stream = new BinaryStream();
             _processData = processData;
+            _isInitialCommentsReceiving = isInitialCommentsReceiving;
 
         }
 
@@ -59,7 +60,7 @@ namespace NicoSitePlugin2.Client
             foreach (var item in stream.Read())
             {
                var entry = ChunkedMessage.Parser.ParseFrom(item);
-               await _processData(entry);
+               await _processData(entry, _isInitialCommentsReceiving);
             }
 
             stream.CheckClearBuffer();

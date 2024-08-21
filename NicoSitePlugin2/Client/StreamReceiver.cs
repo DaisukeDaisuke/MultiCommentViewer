@@ -69,6 +69,11 @@ namespace NicoSitePlugin2.Client
             await Task.CompletedTask;
         }
 
+        public Byte[] getBuffers()
+        {
+            return _buffer.ToArray();
+        }
+
         public void StopReceiving()
         {
             _cancellationTokenSource?.Cancel();

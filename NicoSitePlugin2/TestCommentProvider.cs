@@ -18,6 +18,8 @@ using Dwango.Nicolive.Chat.Service.Edge;
 using System.Linq;
 using System.Web.UI.WebControls;
 using static Dwango.Nicolive.Chat.Data.Enquete.Types;
+using System.Text;
+using System.Security.Policy;
 
 namespace NicoSitePlugin
 {
@@ -557,6 +559,7 @@ check:
         Metadata.Room _room;
         DataProps _dataProps;
         private bool _disposedValue;
+        private int _PackedServerConnectionCount = 0;
         private MessageServerClient? _messageServerClient = null;
 
         private void MetaProvider_Received(object sender, Metadata.IMetaMessage e)
@@ -626,6 +629,7 @@ check:
                         Debug.WriteLine(messageServer.MessageServerUrl);
                         _messageServerClient = new MessageServerClient(messageServer.MessageServerUrl, ProcessChunkedEntry);
                         var task = _messageServerClient.doConnect();
+                        _PackedServerConnectionCount = 0;
                         _toAdd.Add(task);
                         break;
                     case Metadata.ErrorMessage errorMessage:
@@ -654,6 +658,15 @@ check:
             _segmentServers = _segmentServers.Where(server => !server.isDisconnect).ToList();
         }
 
+        public async Task ProcessPackedSegment(PackedSegment segment)
+        {
+            foreach (var chunkedMessage in segment.Messages)
+            {
+                await ProcessChunkedMessage(chunkedMessage, true);
+            }
+            await Task.CompletedTask;
+        }
+
         public List<SegmentServerClient>? _segmentServers = null;
 
         public async Task ProcessChunkedEntry(ChunkedEntry entry)
@@ -669,11 +682,41 @@ check:
             }
             else if(entry.Previous != null)
             {
-                //コメント取得に関係ないので無視
+
+                var Uri = entry.Previous.Uri;
+                if (Uri == null)
+                {
+                    await Task.CompletedTask;
+                    return;
+                }
+                if (_segmentServers == null)
+                {
+                    _segmentServers = new List<SegmentServerClient>();
+                }
+                var segmentServer = new SegmentServerClient(Uri, ProcessChunkedMessage, true);
+                Debug.WriteLine(Uri);
+                _segmentServers.Add(segmentServer);
+                var task = segmentServer.doConnect();
+                _toAdd.Add(task);
             }
             else if (entry.Backward != null)
             {
-                //コメント取得に関係ないので無視
+                //接続前のコメント関連(最新じゃないことがある)
+                if (_PackedServerConnectionCount > 2)
+                {
+                    await Task.CompletedTask;
+                    return;
+                }
+                ++_PackedServerConnectionCount;
+                
+                var uri = entry.Backward?.Segment.Uri;
+                if (uri == null)
+                {
+                    await Task.CompletedTask;
+                    return;
+                }
+                var client = new PackedSegmentClient(uri, ProcessPackedSegment);
+                await client.doConnect();//切断時にProcessPackedSegmentが呼ばれる
             }
             else if (entry.Segment != null)
             {
@@ -728,7 +771,8 @@ check:
                 //var chunkedMessage = ChunkedMessage.Parser.ParseFrom(byteArray);
                 //await ProcessChunkedMessage(chunkedMessage);
 
-                var segmentServer = new SegmentServerClient(Uri, ProcessChunkedMessage);
+                var segmentServer = new SegmentServerClient(Uri, ProcessChunkedMessage, false);
+                Debug.WriteLine(Uri);
                 _segmentServers.Add(segmentServer);
                 var task = segmentServer.doConnect();
                 _toAdd.Add(task);
@@ -737,12 +781,26 @@ check:
             await Task.CompletedTask;
         }
 
-        public async Task ProcessChunkedMessage(ChunkedMessage message)
+        public async Task ProcessChunkedMessage(ChunkedMessage message, bool isInitialCommentsReceiving = false)
         {
+            if (!isInitialCommentsReceiving)
+            {
+                Debug.WriteLine("aa");
+            }
             if (_messageServerClient == null)
             {
+                await Task.CompletedTask;
                 return;
             }
+            if(message.Meta?.Id != null&&message.Meta.Id != "")
+            {
+                if (IsDuplicate(message.Meta.Id))
+                {
+                    await Task.CompletedTask;
+                    return;
+                }
+            }
+
             if (message.Message?.SimpleNotification != null)
             {
                 var notification = message.Message?.SimpleNotification;
@@ -764,7 +822,7 @@ check:
                     };
                     var metadata = new InfoMessageMetadata(comment, _options, _siteOptions)
                     {
-                        IsInitialComment = _isInitialCommentsReceiving,
+                        IsInitialComment = isInitialCommentsReceiving,
                         SiteContextGuid = SiteContextGuid,
                     };
                     var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
@@ -787,7 +845,7 @@ check:
                     };
                     var metadata = new SpiMessageMetadata(comment, _options, _siteOptions)
                     {
-                        IsInitialComment = _isInitialCommentsReceiving,
+                        IsInitialComment = isInitialCommentsReceiving,
                         SiteContextGuid = SiteContextGuid,
                     };
                     var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
@@ -809,7 +867,7 @@ check:
                     };
                     var metadata = new InfoMessageMetadata(comment, _options, _siteOptions)
                     {
-                        IsInitialComment = _isInitialCommentsReceiving,
+                        IsInitialComment = isInitialCommentsReceiving,
                         SiteContextGuid = SiteContextGuid,
                     };
                     var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
@@ -830,7 +888,7 @@ check:
                     };
                     var metadata = new InfoMessageMetadata(comment, _options, _siteOptions)
                     {
-                        IsInitialComment = _isInitialCommentsReceiving,
+                        IsInitialComment = isInitialCommentsReceiving,
                         SiteContextGuid = SiteContextGuid,
                     };
                     var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
@@ -850,7 +908,7 @@ check:
                     };
                     var metadata = new InfoMessageMetadata(comment, _options, _siteOptions)
                     {
-                        IsInitialComment = _isInitialCommentsReceiving,
+                        IsInitialComment = isInitialCommentsReceiving,
                         SiteContextGuid = SiteContextGuid,
                     };
                     var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
@@ -868,7 +926,7 @@ check:
                 };
                 var metadata = new InfoMessageMetadata(comment, _options, _siteOptions)
                 {
-                    IsInitialComment = _isInitialCommentsReceiving,
+                    IsInitialComment = isInitialCommentsReceiving,
                     SiteContextGuid = SiteContextGuid,
                 };
                 var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
@@ -885,7 +943,7 @@ check:
                 };
                 var metadata = new InfoMessageMetadata(comment, _options, _siteOptions)
                 {
-                    IsInitialComment = _isInitialCommentsReceiving,
+                    IsInitialComment = isInitialCommentsReceiving,
                     SiteContextGuid = SiteContextGuid,
                 };
                 var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
@@ -908,7 +966,7 @@ check:
                     };
                     var metadata = new InfoMessageMetadata(comment, _options, _siteOptions)
                     {
-                        IsInitialComment = _isInitialCommentsReceiving,
+                        IsInitialComment = isInitialCommentsReceiving,
                         SiteContextGuid = SiteContextGuid,
                     };
                     var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
@@ -961,7 +1019,7 @@ check:
                         };
                         var metadata = new InfoMessageMetadata(comment, _options, _siteOptions)
                         {
-                            IsInitialComment = _isInitialCommentsReceiving,
+                            IsInitialComment = isInitialCommentsReceiving,
                             SiteContextGuid = SiteContextGuid,
                         };
                         var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
@@ -1064,7 +1122,7 @@ check:
 
                 var metadata = new CommentMessageMetadata(comment, _options, _siteOptions, user, this, isFirstComment)
                 {
-                    IsInitialComment = _isInitialCommentsReceiving,
+                    IsInitialComment = isInitialCommentsReceiving,
                     SiteContextGuid = SiteContextGuid,
                 };
 
@@ -1074,6 +1132,21 @@ check:
 
             await Task.CompletedTask;
         }
+
+        private readonly SynchronizedCollection<string> _receivedCommentIds = new SynchronizedCollection<string>();
+        private bool IsDuplicate(string id)
+        {
+            if (_receivedCommentIds.Contains(id))
+            {
+                return true;
+            }
+            else
+            {
+                _receivedCommentIds.Add(id);
+                return false;
+            }
+        }
+
         public DateTime fixDateTime(DateTime utcTime)
         {
             return utcTime;//不要だったけど放置
@@ -1123,6 +1196,7 @@ check:
             _chatProvider?.Disconnect();
             _messageServerClient?.disconnect();
             _messageServerClient = null;
+            //_receivedCommentIds.Clear();//メモリリークするけど...
             if (_segmentServers != null)
             {
                 foreach (var server in _segmentServers)
