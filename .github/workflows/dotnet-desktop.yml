@@ -43,12 +43,12 @@ jobs:
 
     - name: copy files
       run: |
-        copy ".\BouyomiPlugin\bin\Release\*" ".\Output\Release\plugins\Bouyomi"
-        copy ".\CommentGeneratorPlugin\bin\Release\*" ".\Output\Release\plugins\CommentGenerator"
-        copy ".\YoyakuPlugin\bin\Release\*" ".\Output\Release\plugins\Yoyaku"
+        copy ".\BouyomiPlugin\bin\$env:Configuration\*" ".\Output\$env:Configuration\plugins\Bouyomi"
+        copy ".\CommentGeneratorPlugin\bin\$env:Configuration\*" ".\Output\$env:Configuration\plugins\CommentGenerator"
+        copy ".\YoyakuPlugin\bin\$env:Configuration\*" ".\Output\$env:Configuration\plugins\Yoyaku"
 
     - name:  zipping
-      run: Compress-Archive -Path ./Output/Release/* -Destination 'MultiCommentViewer_v${{ github.event.inputs.tagname }}_stable.zip'
+      run: Compress-Archive -Path "./Output/$env:Configuration/*" -Destination 'MultiCommentViewer_v${{ github.event.inputs.tagname }}_stable.zip'
 
     - name: echo SHA256
       run: Get-FileHash -Algorithm SHA256 -Path 'MultiCommentViewer_v${{ github.event.inputs.tagname }}_stable.zip'
