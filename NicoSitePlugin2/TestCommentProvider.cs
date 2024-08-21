@@ -286,7 +286,7 @@ check:
         /// <summary>
         /// 初期コメント取得中か
         /// </summary>
-        private bool _isInitialCommentsReceiving;
+        private bool _isInitialCommentsReceiving = true;
         protected readonly ConcurrentDictionary<string, int> _userCommentCountDict = new ConcurrentDictionary<string, int>();
         /// <summary>
         /// 意図的な切断か
@@ -522,14 +522,14 @@ check:
                     }
                     break;
                 case Chat.Ping ping:
-                    if (ping.Content == "rs:0")
-                    {
-                        _isInitialCommentsReceiving = true;
-                    }
-                    else if (ping.Content == "rf:0")
-                    {
-                        _isInitialCommentsReceiving = false;
-                    }
+                    //if (ping.Content == "rs:0")
+                    //{
+                    //    _isInitialCommentsReceiving = true;
+                    //}
+                    //else if (ping.Content == "rf:0")
+                    //{
+                    //    _isInitialCommentsReceiving = false;
+                    //}
                     break;
                 case Chat.UnknownMessage unknown:
                     _logger.LogException(new ParseException(unknown.Raw));
@@ -662,7 +662,7 @@ check:
         {
             foreach (var chunkedMessage in segment.Messages)
             {
-                await ProcessChunkedMessage(chunkedMessage, false);
+                await ProcessChunkedMessage(chunkedMessage, true);
             }
             await Task.CompletedTask;
         }
@@ -783,10 +783,15 @@ check:
 
         public async Task ProcessChunkedMessage(ChunkedMessage message, bool isInitialCommentsReceiving = false)
         {
-            if (!isInitialCommentsReceiving)
-            {
-                Debug.WriteLine("aa");
-            }
+            //この棒読み暴走対策意味なかった
+            //if (!isInitialCommentsReceiving&&_isInitialCommentsReceiving == true)
+            //{
+            //    _isInitialCommentsReceiving = false;
+            //}
+            //if(isInitialCommentsReceiving == true&&_isInitialCommentsReceiving == false)
+            //{
+            //    isInitialCommentsReceiving = false;
+            //}
             if (_messageServerClient == null)
             {
                 await Task.CompletedTask;
