@@ -62,7 +62,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Publish artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: DesktopApp
         path: 'MultiCommentViewer_v${{ github.event.inputs.tagname }}_stable.zip'
