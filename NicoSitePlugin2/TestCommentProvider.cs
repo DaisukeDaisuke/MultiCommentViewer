@@ -662,7 +662,7 @@ check:
         {
             foreach (var chunkedMessage in segment.Messages)
             {
-                await ProcessChunkedMessage(chunkedMessage, true);
+                await ProcessChunkedMessage(chunkedMessage, false);
             }
             await Task.CompletedTask;
         }
