@@ -7,13 +7,17 @@ on:
         description: 'tagname'
         required: true
         default: '0.6.35'
+      createRelease:
+        description: 'If "yes", create the release.'
+        required: true
+        default: 'yes'
 jobs:
   build:
     runs-on: windows-latest
 
     env:
+      Solution_Name: MultiCommentViewer.sln
       Configuration: Release
-      Output_Directory: build_output         # ビルド成果物を出力するディレクトリ名
 
     steps:
     - name: Checkout code
@@ -31,16 +35,31 @@ jobs:
       run: dotnet restore $env:Solution_Name
 
     - name: Build solution
-      run: dotnet build ./MultiCommentViewer/MultiCommentViewer.csproj --configuration $env:Configuration
+      run: |
+        dotnet build ./MultiCommentViewer/MultiCommentViewer.csproj --configuration $env:Configuration
+        dotnet build ./BouyomiPlugin/BouyomiPlugin.csproj --configuration $env:Configuration
+        dotnet build ./CommentGeneratorPlugin/CommentGeneratorPlugin.csproj  --configuration $env:Configuration
+        dotnet build ./YoyakuPlugin/YoyakuPlugin.csproj --configuration $env:Configuration
 
-    - run: Compress-Archive -Path ./Output/Release/* -Destination 'MultiCommentViewer_v${{ github.event.inputs.tagname }}_stable.zip'
+    - name: copy files
+      run: |
+        copy ".\BouyomiPlugin\bin\Release\*" ".\Output\Release\plugins\Bouyomi"
+        copy ".\CommentGeneratorPlugin\bin\Release\*" ".\Output\Release\plugins\CommentGenerator"
+        copy ".\YoyakuPlugin\bin\Release\*" ".\Output\Release\plugins\Yoyaku"
 
-    # - name: Upload Release
-    #   uses: ncipollo/release-action@v1.12.0
-    #   with:
-    #     artifacts: 'MultiCommentViewer_v${{ github.event.inputs.tagname }}_stable.zip'
-    #     tag: ${{ github.event.inputs.tagname }}
-    #     token: ${{ secrets.GITHUB_TOKEN }}
+    - name:  zipping
+      run: Compress-Archive -Path ./Output/Release/* -Destination 'MultiCommentViewer_v${{ github.event.inputs.tagname }}_stable.zip'
+
+    - name: echo SHA256
+      run: Get-FileHash -Algorithm SHA256 -Path 'MultiCommentViewer_v${{ github.event.inputs.tagname }}_stable.zip'
+
+    - name: Upload Release
+      if: ${{ github.event.inputs.createRelease == 'yes'}}
+      uses: ncipollo/release-action@v1.12.0
+      with:
+        artifacts: 'MultiCommentViewer_v${{ github.event.inputs.tagname }}_stable.zip'
+        tag: ${{ github.event.inputs.tagname }}
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Publish artifacts
       uses: actions/upload-artifact@v3
