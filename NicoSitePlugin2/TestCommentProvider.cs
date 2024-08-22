@@ -936,7 +936,7 @@ check:
                 }
                 var GiftObj = message.Message?.Gift;
                 var giftId = GiftObj.ItemId;
-                var userIdp = GiftObj.AdvertiserUserId.ToString();//ギフトを投げた人。userId == "900000000"
+                var userIdp = GiftObj.AdvertiserUserId.ToString();
                 var username = GiftObj.AdvertiserName;
                 var point = GiftObj.Point;
                 var itemName = GiftObj.ItemName;
