@@ -635,7 +635,7 @@ check:
                     case Metadata.ErrorMessage errorMessage:
                         if(errorMessage.reason == "COMMENT_POST_NOT_ALLOWED")
                         {
-                            SendSystemInfo($"未ログインのためコメントをコメント投稿が拒否されました。ブラウザを起動している場合終了し、コメビュを再起動してください", InfoType.Error);
+                            SendSystemInfo($"未ログインのためコメント投稿が拒否されました。ブラウザを起動している場合終了し、コメビュを再起動してください", InfoType.Error);
                             break;
                         }
                         else if(errorMessage.reason == "INVALID_MESSAGE")
@@ -694,7 +694,6 @@ check:
                     _segmentServers = new List<SegmentServerClient>();
                 }
                 var segmentServer = new SegmentServerClient(Uri, ProcessChunkedMessage, true);
-                Debug.WriteLine(Uri);
                 _segmentServers.Add(segmentServer);
                 var task = segmentServer.doConnect();
                 _toAdd.Add(task);
@@ -763,8 +762,16 @@ check:
                 //string base64String ="Cj4KJEVoa0tFZ21hY1V2VmFHcVJBUkdyTkg2LUdiREdyaENfbS1FTRIMCMTajLYGEICl6b8DGggKBgjKlOWkARI6OjgSNuOAjOa5iuOBseOBk+OCieOBleOCk+OAjeOBjOW8leeUqOOCkumWi+Wni+OBl+OBvuOBl+OBnw==";
                 //「湊ぱこらさん」が引用を終了しました
                 //string base64String ="Cj4KJEVoa0tFZ21uZW9Qd2FXcVJBUkY3dE1xNUxHSDVyUkNfbS1FTRIMCI3bjLYGELjUt9MBGggKBgjKlOWkARI6OjgSNuOAjOa5iuOBseOBk+OCieOBleOCk+OAjeOBjOW8leeUqOOCkue1guS6huOBl+OBvuOBl+OBnw==";
-
-
+                //だいこんさんが1000ptニコニ広告しました「初めての広告です！」
+                //string base64String = "Cj0KJEVoa0tFZ21MY1ZSM20zaVJBUkVuT3h1cDFGaUNoUkRPdktFTxILCLyfm7YGENDM2nQaCAoGCJm65qQBEmBKXhJcCOgHElfjgaDjgYTjgZPjgpPjgZXjgpPjgYwxMDAwcHTjg4vjgrPjg4vluoPlkYrjgZfjgb7jgZfjgZ/jgIzliJ3jgoHjgabjga7luoPlkYrjgafjgZnvvIHjgI0=";
+                //【ギフト貢献1位】だいこんさんがギフト「サッカーボール（30pt）」を贈りました
+                //string base64String = "Cj0KJEVoa0tFZ2xkZHl4V3BYaVJBUkZ6MWd4MTBMS3h1UkRPdktFTxILCMOkm7YGENCG2DcaCAoGCJm65qQBEj9CPQoNYmFsbF9mb290YmFsbBC19Y8XGgzjgaDjgYTjgZPjgpMgHjIV44K144OD44Kr44O844Oc44O844OrOAE=";
+                //匿名ギフト【ギフト貢献1位】名無しさんがギフト「バスケットボール（30pt）」を贈りました
+                //string base64String = "Cj4KJEVoa0tFZ2t2Y0Y1eEVYbVJBUkUxT20tSkdRRm1peERPdktFTxIMCO/bm7YGEODCgc0DGggKBgiZuuakARI8QjoKD2JhbGxfYmFza2V0YmFsbBoJ5ZCN54Sh44GXIB4yGOODkOOCueOCseODg+ODiOODnOODvOODqzgB";
+                //【広告貢献2位】マルチコメントビュワーさんが500ptニコニ広告しました
+                //string base64String = "Cj4KJEVoa0tFZ2xwZHpsM0pIbVJBUkVaUUJQdjdlUnhxaERPdktFTxIMCM7lm7YGEKDAvrUCGggKBgiZuuakARJpSmcSZQjcCxJg44CQ5bqD5ZGK6LKi54yuMuS9jeOAkeODnuODq+ODgeOCs+ODoeODs+ODiOODk+ODpeODr+ODvOOBleOCk+OBjDUwMHB044OL44Kz44OL5bqD5ZGK44GX44G+44GX44Gf";
+                //【ギフト貢献1位】だいこんさんがギフト「さよならバイバイ（50pt）」を贈りました
+                //string base64String = "Cj0KJEVoa0tFZ2xUZlhJX0xYbVJBUkhJc21uY0NRLVBnaERPdktFTxILCI7qm7YGEPiyxVwaCAoGCJm65qQBEklCRwoUc3RhbXBfc2F5b25hcmFiYWliYWkQtfWPFxoM44Gg44GE44GT44KTIDIyGOOBleOCiOOBquOCieODkOOCpOODkOOCpDgB";
 
                 //Base64文字列をbyte[] に変換
                 //byte[] byteArray = Convert.FromBase64String(base64String);
@@ -922,14 +929,37 @@ check:
             }
             if(message.Message?.Gift != null)
             {
-                SendSystemInfo("ギフトを検知しましたが、このバージョンでは対応していません", InfoType.Error);
-                var contents = "ギフトを検知しました";
-                var comment = new NicoInfo(contents)
+                var date = Now();
+                if (message.Meta?.At != null)
                 {
-                    Text = contents,
-                    PostedAt = Now(),
+                    date = fixDateTime(message.Meta.At.ToDateTime());
+                }
+                var GiftObj = message.Message?.Gift;
+                var giftId = GiftObj.ItemId;
+                var userIdp = GiftObj.AdvertiserUserId.ToString();//ギフトを投げた人。userId == "900000000"
+                var username = GiftObj.AdvertiserName;
+                var point = GiftObj.Point;
+                var itemName = GiftObj.ItemName;
+                var contributionRank = GiftObj.ContributionRank;
+                var text = "";
+                if (contributionRank == 0)
+                {
+                    text = $"{username}さんがギフト「{itemName}（ {point}pt ）」を贈りました";
+                }
+                else
+                {
+                    text = $"【ギフト貢献{contributionRank}位】{username}さんがギフト「{itemName}（ {point}pt ）」を贈りました";
+                }
+                
+                var gift = new NicoGift(text)
+                {
+                    Text = text,
+                    PostedAt = date,
+                    UserId = userIdp == "0" ? "" : userIdp,
+                    NameItems = Common.MessagePartFactory.CreateMessageItems(username),
                 };
-                var metadata = new InfoMessageMetadata(comment, _options, _siteOptions)
+                var comment = gift;
+                var metadata = new ItemMessageMetadata(gift, _options, _siteOptions)
                 {
                     IsInitialComment = isInitialCommentsReceiving,
                     SiteContextGuid = SiteContextGuid,
@@ -939,20 +969,33 @@ check:
             }
             if (message.Message?.Nicoad != null)
             {
-                SendSystemInfo("ニコニ広告を検知しましたが、このバージョンでは対応していません", InfoType.Error);
-                var contents = "ニコニ広告を検知しました";
-                var comment = new NicoInfo(contents)
+                var adv1 = message.Message.Nicoad.V1;
+                if (adv1 != null)
                 {
-                    Text = contents,
-                    PostedAt = Now(),
-                };
-                var metadata = new InfoMessageMetadata(comment, _options, _siteOptions)
+                    var date = Now();
+                    if (message.Meta?.At != null)
+                    {
+                        date = fixDateTime(message.Meta.At.ToDateTime());
+                    }
+                    var contents = adv1.Message;
+                    var ad = new NicoAd(contents)
+                    {
+                        PostedAt = date,
+                        Text = contents,
+                    };
+                    var comment = ad;
+                    var metadata = new AdMessageMetadata(ad, _options, _siteOptions)
+                    {
+                        IsInitialComment = isInitialCommentsReceiving,
+                        SiteContextGuid = SiteContextGuid,
+                    };
+                    var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
+                    RaiseMessageReceived(context);
+                }
+                else
                 {
-                    IsInitialComment = isInitialCommentsReceiving,
-                    SiteContextGuid = SiteContextGuid,
-                };
-                var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
-                RaiseMessageReceived(context);
+                    SendSystemInfo("この広告フォーマットは対応していません", InfoType.Error);
+                }
             }
             if(message.State != null)
             {
