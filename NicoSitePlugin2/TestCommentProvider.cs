@@ -702,7 +702,7 @@ check:
             else if (entry.Backward != null)
             {
                 //接続前のコメント関連(最新じゃないことがある)
-                if (_PackedServerConnectionCount > 2)
+                if (_PackedServerConnectionCount > 1)
                 {
                     await Task.CompletedTask;
                     return;
