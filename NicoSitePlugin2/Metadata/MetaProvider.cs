@@ -28,6 +28,7 @@ namespace NicoSitePlugin.Metadata
             {
                 _ws.Received -= Ws_Received;
                 _ws = null;
+                await Task.CompletedTask;
             }
         }
 

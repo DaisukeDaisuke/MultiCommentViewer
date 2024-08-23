@@ -1287,6 +1287,8 @@ check:
                 }
                 _segmentServers = new List<SegmentServerClient>();
             }
+            _toAdd.RemoveAll(task => task.IsCompleted);//ここで使い終わったクライアントをGCしておく
+            _mainLooptcs.SetResult(null);
         }
 
         public override async Task<ICurrentUserInfo> GetCurrentUserInfo(IBrowserProfile browserProfile)
