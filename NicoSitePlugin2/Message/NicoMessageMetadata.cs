@@ -330,12 +330,10 @@ namespace NicoSitePlugin
         public override Color BackColor => _siteOptions.EmotionBackColor;
         public override Color ForeColor => _siteOptions.EmotionForeColor;
 
-        public EmotionMessageMetadata(INicoEmotion item, ICommentOptions options, INicoSiteOptions siteOptions, IUser user, ICommentProvider cp)
+        public EmotionMessageMetadata(INicoEmotion item, ICommentOptions options, INicoSiteOptions siteOptions)
             : base(options, siteOptions)
         {
             _item = item;
-            User = user;
-            CommentProvider = cp;
 
         }
     }
