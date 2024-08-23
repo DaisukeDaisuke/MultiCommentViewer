@@ -451,7 +451,7 @@ check:
                                 UserId = chat.UserId,
                             };
                             comment = abc;
-                            metadata = new EmotionMessageMetadata(abc, _options, _siteOptions, user, this)
+                            metadata = new EmotionMessageMetadata(abc, _options, _siteOptions)
                             {
                                 IsInitialComment = _isInitialCommentsReceiving,
                                 SiteContextGuid = SiteContextGuid,
@@ -708,7 +708,7 @@ check:
                 }
                 ++_PackedServerConnectionCount;
                 
-                var uri = entry.Backward?.Segment.Uri;
+                var uri = entry.Backward?.Segment?.Uri;
                 if (uri == null)
                 {
                     await Task.CompletedTask;
@@ -719,7 +719,7 @@ check:
             }
             else if (entry.Segment != null)
             {
-                string Uri = entry.Segment.Uri;
+                string Uri = entry.Segment?.Uri;
                 if(Uri == null)
                 {
                     await Task.CompletedTask;
@@ -770,8 +770,11 @@ check:
                 //string base64String = "Cj4KJEVoa0tFZ2t2Y0Y1eEVYbVJBUkUxT20tSkdRRm1peERPdktFTxIMCO/bm7YGEODCgc0DGggKBgiZuuakARI8QjoKD2JhbGxfYmFza2V0YmFsbBoJ5ZCN54Sh44GXIB4yGOODkOOCueOCseODg+ODiOODnOODvOODqzgB";
                 //【広告貢献2位】マルチコメントビュワーさんが500ptニコニ広告しました
                 //string base64String = "Cj4KJEVoa0tFZ2xwZHpsM0pIbVJBUkVaUUJQdjdlUnhxaERPdktFTxIMCM7lm7YGEKDAvrUCGggKBgiZuuakARJpSmcSZQjcCxJg44CQ5bqD5ZGK6LKi54yuMuS9jeOAkeODnuODq+ODgeOCs+ODoeODs+ODiOODk+ODpeODr+ODvOOBleOCk+OBjDUwMHB044OL44Kz44OL5bqD5ZGK44GX44G+44GX44Gf";
-                //【ギフト貢献1位】だいこんさんがギフト「さよならバイバイ（50pt）」を贈りました
-                //string base64String = "Cj0KJEVoa0tFZ2xUZlhJX0xYbVJBUkhJc21uY0NRLVBnaERPdktFTxILCI7qm7YGEPiyxVwaCAoGCJm65qQBEklCRwoUc3RhbXBfc2F5b25hcmFiYWliYWkQtfWPFxoM44Gg44GE44GT44KTIDIyGOOBleOCiOOBquOCieODkOOCpOODkOOCpDgB";
+                //contributionRankがないパターン(大人気配信者から取得)
+                //string base64String = "Cj4KJEVoa0tFZ21RZmJ4WWEzbVJBUkh4X0E0WlhGMHV0aERKejZBTxIMCPOJnLYGELi4za0DGggKBgisueakARJPQk0KD3l1bWVteWFuX3Jvb21iYRCv/c0QGgzjgZnjgajjgozjgpMg9AMyJOmXh+ODreODnOODg+ODiOaOg+mZpOapn+OBq+OCg+OCk+OBkw==";
+                //contributionRankとadvertiserNameがないパターン(大人気配信者から取得)
+                //string base64String = "Cj4KJEVoa0tFZ21NY3JqNmEzbVJBUkhsekdmNmFsUHFyQkRKejZBTxIMCJ2KnLYGENDRzq8BGggKBgisueakARIpQicKDXN0YWNrX2ljZV9jdXAaCeWQjeeEoeOBlyAyMgnjgqvjg4Pjg5c=";
+
 
                 //Base64文字列をbyte[] に変換
                 //byte[] byteArray = Convert.FromBase64String(base64String);
@@ -824,7 +827,7 @@ check:
                     var date = Now();
                     if (message.Meta?.At != null)
                     {
-                        date = fixDateTime(message.Meta.At.ToDateTime());
+                        date = fixDateTimeJP(message.Meta.At.ToDateTime());
                     }
 
                     var comment = new NicoInfo(contents)
@@ -847,7 +850,7 @@ check:
                     var date = Now();
                     if (message.Meta?.At != null)
                     {
-                        date = fixDateTime(message.Meta.At.ToDateTime());
+                        date = fixDateTimeJP(message.Meta.At.ToDateTime());
                     }
 
                     var comment = new NicoSpi(Ichiba)
@@ -870,7 +873,7 @@ check:
                     var date = Now();
                     if (message.Meta?.At != null)
                     {
-                        date = fixDateTime(message.Meta.At.ToDateTime());
+                        date = fixDateTimeJP(message.Meta.At.ToDateTime());
                     }
                     var comment = new NicoInfo(contents)
                     {
@@ -891,7 +894,7 @@ check:
                     var date = Now();
                     if (message.Meta?.At != null)
                     {
-                        date = fixDateTime(message.Meta.At.ToDateTime());
+                        date = fixDateTimeJP(message.Meta.At.ToDateTime());
                     }
                     var comment = new NicoInfo(contents)
                     {
@@ -911,7 +914,7 @@ check:
                     var date = Now();
                     if (message.Meta?.At != null)
                     {
-                        date = fixDateTime(message.Meta.At.ToDateTime());
+                        date = fixDateTimeJP(message.Meta.At.ToDateTime());
                     }
                     var comment = new NicoInfo(contents)
                     {
@@ -925,6 +928,27 @@ check:
                     };
                     var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
                     RaiseMessageReceived(context);
+                }else if (notification.Emotion != null&&notification.Emotion != "")
+                {
+                    var date = Now();
+                    if (message.Meta?.At != null)
+                    {
+                        date = fixDateTimeJP(message.Meta.At.ToDateTime());
+                    }
+                    var content = notification.Emotion;
+                    var abc = new NicoEmotion(content)
+                    {
+                        PostedAt = date,
+                        Content = content
+                    };
+                    var comment = abc;
+                    var metadata = new EmotionMessageMetadata(comment, _options, _siteOptions)
+                    {
+                        IsInitialComment = isInitialCommentsReceiving,
+                        SiteContextGuid = SiteContextGuid,
+                    };
+                    var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
+                    RaiseMessageReceived(context);
                 }
             }
             if(message.Message?.Gift != null)
@@ -932,7 +956,7 @@ check:
                 var date = Now();
                 if (message.Meta?.At != null)
                 {
-                    date = fixDateTime(message.Meta.At.ToDateTime());
+                    date = fixDateTimeJP(message.Meta.At.ToDateTime());
                 }
                 var GiftObj = message.Message?.Gift;
                 var giftId = GiftObj.ItemId;
@@ -975,7 +999,7 @@ check:
                     var date = Now();
                     if (message.Meta?.At != null)
                     {
-                        date = fixDateTime(message.Meta.At.ToDateTime());
+                        date = fixDateTimeJP(message.Meta.At.ToDateTime());
                     }
                     var contents = adv1.Message;
                     var ad = new NicoAd(contents)
@@ -1057,7 +1081,7 @@ check:
                         var date = Now();
                         if (message.Meta?.At != null)
                         {
-                            date = fixDateTime(message.Meta.At.ToDateTime());
+                            date = fixDateTimeJP(message.Meta.At.ToDateTime());
                         }
 
                         var comment = new NicoInfo(contents)
@@ -1199,6 +1223,13 @@ check:
         {
             return utcTime;//不要だったけど放置
         }
+        public DateTime fixDateTimeJP(DateTime utcTime)
+        {
+            // UTC時間に9時間を加算して日本標準時に変換
+            return utcTime.AddHours(9);
+        }
+
+
 
         public string ToPercentage(int? number)
         {
