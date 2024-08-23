@@ -930,25 +930,28 @@ check:
                     RaiseMessageReceived(context);
                 }else if (notification.Emotion != null&&notification.Emotion != "")
                 {
-                    var date = Now();
-                    if (message.Meta?.At != null)
+                    if (!isInitialCommentsReceiving)
                     {
-                        date = fixDateTimeJP(message.Meta.At.ToDateTime());
+                        var date = Now();
+                        if (message.Meta?.At != null)
+                        {
+                            date = fixDateTimeJP(message.Meta.At.ToDateTime());
+                        }
+                        var content = notification.Emotion;
+                        var abc = new NicoEmotion(content)
+                        {
+                            PostedAt = date,
+                            Content = content
+                        };
+                        var comment = abc;
+                        var metadata = new EmotionMessageMetadata(comment, _options, _siteOptions)
+                        {
+                            IsInitialComment = isInitialCommentsReceiving,
+                            SiteContextGuid = SiteContextGuid,
+                        };
+                        var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
+                        RaiseMessageReceived(context);
                     }
-                    var content = notification.Emotion;
-                    var abc = new NicoEmotion(content)
-                    {
-                        PostedAt = date,
-                        Content = content
-                    };
-                    var comment = abc;
-                    var metadata = new EmotionMessageMetadata(comment, _options, _siteOptions)
-                    {
-                        IsInitialComment = isInitialCommentsReceiving,
-                        SiteContextGuid = SiteContextGuid,
-                    };
-                    var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
-                    RaiseMessageReceived(context);
                 }
             }
             if(message.Message?.Gift != null)
