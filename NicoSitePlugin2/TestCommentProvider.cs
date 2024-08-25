@@ -40,6 +40,8 @@ namespace NicoSitePlugin
             var dataProps = new DataProps(dataPropsJson);
             return dataProps;
         }
+
+        private CancellationTokenSource? _DelayCancelSource = null;
         public override async Task ConnectAsync(string input, IBrowserProfile browserProfile)
         {
             BeforeConnect();
@@ -51,30 +53,60 @@ namespace NicoSitePlugin
                 return;
             }
             _isFirstConnection = true;
-reload:
             _isDisconnectedExpected = false;
+        reload:
+            var isManualDisconnect = _isDisconnectedExpected;
+            _isDisconnectedExpected = false;
+            __isDisconnected = false;
             _disconnectCts = new CancellationTokenSource();
-            try
+            if (!isManualDisconnect)
             {
-                await ConnectInternalAsync(nicoInput, browserProfile);
+                try
+                {
+                    await ConnectInternalAsync(nicoInput, browserProfile);
+                }
+                catch (ApiGetCommunityLivesException ex)
+                {
+                    _isDisconnectedExpected = true;
+                    SendSystemInfo("コミュニティの配信状況の取得に失敗しました", InfoType.Error);
+                    _logger.LogException(ex, "", $"input:{input}, browser:{browserProfile.Type}");
+                }
+                catch (SpecChangedException ex)
+                {
+                    _isDisconnectedExpected = true;
+                    SendSystemInfo("サイトの仕様変更があったためコメント取得を継続できません", InfoType.Error);
+                    _logger.LogException(ex, "", $"input:{input}, browser:{browserProfile.Type}");
+                }
+                catch (Exception ex)
+                {
+                    //_isDisconnectedExpected = true;
+                    if (!isManualDisconnect)
+                    {
+                        SendSystemInfo("オフライン、またはニコ生視聴ページにアクセスできません。10秒後に再試行します。", InfoType.Error);
+                        _logger.LogException(ex, "", $"input:{input}, browser:{browserProfile.Type}");
+                        _DelayCancelSource = new CancellationTokenSource();
+                        try
+                        {
+                            await Task.Delay(1000 * 10, _DelayCancelSource.Token);
+                        }
+                        catch (TaskCanceledException)
+                        {
+                        }
+                        finally
+                        {
+                            _DelayCancelSource = null;
+                        }
+                        goto reload;
+                    }
+                    else
+                    {
+                        _isDisconnectedExpected = true;
+                    }
+                }
             }
-            catch (ApiGetCommunityLivesException ex)
+            else
             {
                 _isDisconnectedExpected = true;
-                SendSystemInfo("コミュニティの配信状況の取得に失敗しました", InfoType.Error);
-                _logger.LogException(ex, "", $"input:{input}, browser:{browserProfile.Type}");
-            }
-            catch (SpecChangedException ex)
-            {
-                _isDisconnectedExpected = true;
-                SendSystemInfo("サイトの仕様変更があったためコメント取得を継続できません", InfoType.Error);
-                _logger.LogException(ex, "", $"input:{input}, browser:{browserProfile.Type}");
-            }
-            catch (Exception ex)
-            {
-                _isDisconnectedExpected = true;
-                SendSystemInfo("オフライン、またはニコ生視聴ページにアクセスできません。", InfoType.Error);
-                _logger.LogException(ex, "", $"input:{input}, browser:{browserProfile.Type}");
             }
             _dataProps = null;
             if (!_isDisconnectedExpected)
@@ -94,7 +126,7 @@ reload:
         }
         private async Task<string> GetChannelLiveId(ChannelUrl channelUrl)
         {
-check:
+        check:
             var currentLiveId = await Api.GetCurrentChannelLiveId(_server, channelUrl.ChannelScreenName);
             if (currentLiveId != null)
             {
@@ -112,7 +144,7 @@ check:
         }
         private async Task<string> GetUserLiveId(UserId UserId, CookieContainer cc)
         {
-    check:
+        check:
             var currentLiveId = await Api.GetUserIdToCurrentLiveId(_server, UserId.Raw, cc);
             if (currentLiveId != null)
             {
@@ -130,7 +162,7 @@ check:
         }
         private async Task<string> GetCommunityLiveId(CommunityUrl communityUrl, CookieContainer cc)
         {
-check:
+        check:
             var currentLiveId = await Api.GetCurrentCommunityLiveId(_server, communityUrl.CommunityId, cc);
             if (currentLiveId != null)
             {
@@ -622,23 +654,23 @@ check:
                         _DiffTime = CalculateTimeDifference(serverTime.CurrentMs, DateTime.Now, 0.0f);
                         break;
                     case Metadata.MessageServer messageServer:
-                        if(_messageServerClient != null)
+                        if (_messageServerClient != null)
                         {
-                           _messageServerClient.disconnect();
+                            _messageServerClient.disconnect();
                         }
                         Debug.WriteLine(messageServer.MessageServerUrl);
-                        _messageServerClient = new MessageServerClient(messageServer.MessageServerUrl, ProcessChunkedEntry);
+                        _messageServerClient = new MessageServerClient(messageServer.MessageServerUrl, ProcessChunkedEntry, OnUnexpectedDisconnect);
                         var task = _messageServerClient.doConnect();
                         _PackedServerConnectionCount = 0;
                         _toAdd.Add(task);
                         break;
                     case Metadata.ErrorMessage errorMessage:
-                        if(errorMessage.reason == "COMMENT_POST_NOT_ALLOWED")
+                        if (errorMessage.reason == "COMMENT_POST_NOT_ALLOWED")
                         {
                             SendSystemInfo($"未ログインのためコメント投稿が拒否されました。ブラウザを起動している場合終了し、コメビュを再起動してください", InfoType.Error);
                             break;
                         }
-                        else if(errorMessage.reason == "INVALID_MESSAGE")
+                        else if (errorMessage.reason == "INVALID_MESSAGE")
                         {
                             SendSystemInfo($"[ニコ生]サイトの仕様変更を検知しました。", InfoType.Error);
                         }//TODO: CONNECT_ERRORも処理する
@@ -652,7 +684,22 @@ check:
             }
         }
 
-        public void RemoveDisconnectedServers()
+        bool __isDisconnected = false;
+
+        private async Task OnUnexpectedDisconnect()
+        {
+            if (!__isDisconnected&&!_isDisconnectedExpected)
+            {
+                __isDisconnected = true;
+                SendSystemInfo($"ニコ生: httpストリーミングのタイムアウトを検出しました。一度切断し、自動的に再接続します。", InfoType.Error);//自動的に再接続
+
+                Disconnect();
+                _isDisconnectedExpected = false;
+            }
+            await Task.CompletedTask;
+        }
+
+    public void RemoveDisconnectedServers()
         {
             // isdisconnectがtrueの要素を削除
             _segmentServers = _segmentServers.Where(server => !server.isDisconnect).ToList();
@@ -693,7 +740,7 @@ check:
                 {
                     _segmentServers = new List<SegmentServerClient>();
                 }
-                var segmentServer = new SegmentServerClient(Uri, ProcessChunkedMessage, true);
+                var segmentServer = new SegmentServerClient(Uri, ProcessChunkedMessage, OnUnexpectedDisconnect,  true);
                 _segmentServers.Add(segmentServer);
                 var task = segmentServer.doConnect();
                 _toAdd.Add(task);
@@ -781,7 +828,7 @@ check:
                 //var chunkedMessage = ChunkedMessage.Parser.ParseFrom(byteArray);
                 //await ProcessChunkedMessage(chunkedMessage);
 
-                var segmentServer = new SegmentServerClient(Uri, ProcessChunkedMessage, false);
+                var segmentServer = new SegmentServerClient(Uri, ProcessChunkedMessage, OnUnexpectedDisconnect, false);
                 Debug.WriteLine(Uri);
                 _segmentServers.Add(segmentServer);
                 var task = segmentServer.doConnect();
@@ -1288,7 +1335,14 @@ check:
                 _segmentServers = new List<SegmentServerClient>();
             }
             _toAdd.RemoveAll(task => task.IsCompleted);//ここで使い終わったクライアントをGCしておく
-            _mainLooptcs.SetResult(null);
+            if (_mainLooptcs != null&&!_mainLooptcs.Task.IsCompleted)
+            {
+                _mainLooptcs.SetResult(null);
+            }
+            if(_DelayCancelSource != null)
+            {
+                _DelayCancelSource.Cancel();
+            }
         }
 
         public override async Task<ICurrentUserInfo> GetCurrentUserInfo(IBrowserProfile browserProfile)

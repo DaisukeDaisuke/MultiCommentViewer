@@ -16,9 +16,10 @@ namespace NicoSitePlugin2.Client
         private BinaryStream? stream;
         private Func<ChunkedMessage, bool, Task>? _processData;
         private bool _isInitialCommentsReceiving = false;
+        private Func<Task> _onNetworkError;
 
         // コンストラクタ
-        public SegmentServerClient(string uri, Func<ChunkedMessage, bool, Task> processData, bool isInitialCommentsReceiving)
+        public SegmentServerClient(string uri, Func<ChunkedMessage, bool, Task> processData, Func<Task> onNetworkError, bool isInitialCommentsReceiving)
         {
             _uri = uri;
             var headers = new Dictionary<string, string>();
@@ -26,13 +27,18 @@ namespace NicoSitePlugin2.Client
             stream = new BinaryStream();
             _processData = processData;
             _isInitialCommentsReceiving = isInitialCommentsReceiving;
+            _onNetworkError = onNetworkError;
 
         }
 
         public async Task doConnect()
         {
            await _streamReceiver.ReceiveAsync(_uri);
-           isDisconnect = true;
+            if (_streamReceiver.UnexpectedDisconnect)
+            {
+                await _onNetworkError();
+            }
+            isDisconnect = true;
            //頻繁にオブジェクトの生成と破壊を繰り返す処理なので、GCしやすいように子クラスの参照を消す
            stream = null;
            _processData = null;

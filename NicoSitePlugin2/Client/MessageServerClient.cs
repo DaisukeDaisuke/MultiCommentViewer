@@ -18,7 +18,8 @@ namespace NicoSitePlugin2.Client
         private string _uri;
         private bool isDisconnect = false;
         private BinaryStream stream;
-
+        private Func<Task> _onNetworkError;
+        private string? BeforeNextStreamAt = null;
         public string NextStreamAt
         {
             get => nextStreamAt;
@@ -27,7 +28,7 @@ namespace NicoSitePlugin2.Client
 
        
 
-        public MessageServerClient(string uri, Func<ChunkedEntry, Task> processData)
+        public MessageServerClient(string uri, Func<ChunkedEntry, Task> processData, Func<Task> onNetworkError)
         {
             _uri = uri;
             _processData = processData;
@@ -37,20 +38,38 @@ namespace NicoSitePlugin2.Client
                 { "header", "u=1, i" }
             };
             _streamReceiver = new StreamReceiver(ProcessRawData, headers);
+            _onNetworkError = onNetworkError;
 
         }
 
 
         public async Task doConnect()
         {
-            while (!isDisconnect)
+            while (!isDisconnect&&!IsUnexpectedDisconnect())
             {
                 // ストリーミングの受信を開始
                 await _streamReceiver.ReceiveAsync(_uri + "?at=" + nextStreamAt);
+                if(BeforeNextStreamAt == NextStreamAt)
+                {
+                    await _onNetworkError();
+                    await Task.CompletedTask;
+                    return;
+                }
+                BeforeNextStreamAt = NextStreamAt;
+            }
+            if (IsUnexpectedDisconnect())
+            {
+                await _onNetworkError();
             }
             await Task.CompletedTask;
             
         }
+
+        public bool IsUnexpectedDisconnect()
+        {
+            return _streamReceiver.UnexpectedDisconnect;
+        }
+
         public bool disconnect()
         {
            _streamReceiver.StopReceiving();

@@ -16,6 +16,7 @@ namespace NicoSitePlugin2.Client
         private CancellationTokenSource _cancellationTokenSource;
         private List<byte> _buffer;
         private Func<byte[], Task> _processData;
+        public bool UnexpectedDisconnect { get; set; } = false;
         public StreamReceiver(Func<byte[], Task> processData, Dictionary<string, string> headers)
         {
             _httpClient = new HttpClient();
@@ -26,6 +27,7 @@ namespace NicoSitePlugin2.Client
             {
                 _httpClient.DefaultRequestHeaders.Add(header.Key, header.Value);
             }
+            _httpClient.Timeout = TimeSpan.FromSeconds(30);
         }
         public async Task ReceiveAsync(string url)
         {
@@ -41,17 +43,45 @@ namespace NicoSitePlugin2.Client
                     using (var stream = await response.Content.ReadAsStreamAsync())
                     {
                         var buffer = new byte[8192];
-                        int bytesRead;
-                        while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
+                        int bytesRead ;
+
+                        try
                         {
-                            byte[] dataChunk = new byte[bytesRead];
-                            Array.Copy(buffer, dataChunk, bytesRead);
-                            _buffer.AddRange(dataChunk);
+                            while(true)
+                            {
+                                
+                                Task<int> result = stream.ReadAsync(buffer, 0, buffer.Length, _cancellationTokenSource.Token);
 
-                            // Process the received data chunk
-                            await _processData(dataChunk);
+                                await Task.WhenAny(result, Task.Delay(1000 * 30, _cancellationTokenSource.Token));
+
+                                if (result.IsCompleted)
+                                {
+                                    bytesRead = await result; // 非同期操作が完了したら、結果を取得
+                                    if (bytesRead <= 0)
+                                    {
+                                        break;
+                                    }
+                                    byte[] dataChunk = new byte[bytesRead];
+                                    Array.Copy(buffer, dataChunk, bytesRead);
+                                    _buffer.AddRange(dataChunk);
+
+                                    // Process the received data chunk
+                                    await _processData(dataChunk);   
+                                }
+                                else
+                                {
+                                    stream.Close();
+                                    StopReceiving();
+                                    UnexpectedDisconnect = true;
+                                    break;
+                                }
+                            }
                         }
-
+                        catch (OperationCanceledException)
+                        {
+                            // タイムアウトやキャンセルが発生した場合の処理
+                            Console.WriteLine("Read operation was canceled due to a timeout or external cancellation.");
+                        }
                         ////切断時の処理
                         //await _onDisconnect();
                     }
@@ -64,7 +94,6 @@ namespace NicoSitePlugin2.Client
             catch (Exception ex)
             {
                 Debug.WriteLine($"An error occurred: {ex.Message}");
-                await Task.Delay(1000);
             }
             await Task.CompletedTask;
         }
