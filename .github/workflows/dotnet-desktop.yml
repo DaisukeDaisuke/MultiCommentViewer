@@ -53,6 +53,9 @@ jobs:
     - name: echo SHA256
       run: Get-FileHash -Algorithm SHA256 -Path 'MultiCommentViewer_v${{ github.event.inputs.tagname }}_stable.zip'
 
+    - name: echo SHA1
+      run: Get-FileHash -Algorithm SHA1 -Path 'MultiCommentViewer_v${{ github.event.inputs.tagname }}_stable.zip'
+
     - name: Upload Release
       if: ${{ github.event.inputs.createRelease == 'yes'}}
       uses: ncipollo/release-action@v1.12.0
