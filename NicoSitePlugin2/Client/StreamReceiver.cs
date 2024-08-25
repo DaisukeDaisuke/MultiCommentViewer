@@ -94,6 +94,7 @@ namespace NicoSitePlugin2.Client
             catch (Exception ex)
             {
                 Debug.WriteLine($"An error occurred: {ex.Message}");
+                UnexpectedDisconnect = true;
             }
             await Task.CompletedTask;
         }
