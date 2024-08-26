@@ -819,7 +819,7 @@ namespace NicoSitePlugin
                 //string base64String = "Cj4KJEVoa0tFZ2xwZHpsM0pIbVJBUkVaUUJQdjdlUnhxaERPdktFTxIMCM7lm7YGEKDAvrUCGggKBgiZuuakARJpSmcSZQjcCxJg44CQ5bqD5ZGK6LKi54yuMuS9jeOAkeODnuODq+ODgeOCs+ODoeODs+ODiOODk+ODpeODr+ODvOOBleOCk+OBjDUwMHB044OL44Kz44OL5bqD5ZGK44GX44G+44GX44Gf";
                 //contributionRankがないパターン(大人気配信者から取得)
                 //string base64String = "Cj4KJEVoa0tFZ21RZmJ4WWEzbVJBUkh4X0E0WlhGMHV0aERKejZBTxIMCPOJnLYGELi4za0DGggKBgisueakARJPQk0KD3l1bWVteWFuX3Jvb21iYRCv/c0QGgzjgZnjgajjgozjgpMg9AMyJOmXh+ODreODnOODg+ODiOaOg+mZpOapn+OBq+OCg+OCk+OBkw==";
-                //contributionRankとadvertiserNameがないパターン(大人気配信者から取得)
+                //contributionRankとadvertiserUserIdがないパターン(大人気配信者から取得)
                 //string base64String = "Cj4KJEVoa0tFZ21NY3JqNmEzbVJBUkhsekdmNmFsUHFyQkRKejZBTxIMCJ2KnLYGENDRzq8BGggKBgisueakARIpQicKDXN0YWNrX2ljZV9jdXAaCeWQjeeEoeOBlyAyMgnjgqvjg4Pjg5c=";
                 //まもなく生放送クルーズが到着します(simpleNotification > cruise(string))
                 //string base64String = "Cj0KJEVoa0tFZ2taZWpEWUlZMlJBUkgzTGtDR2ZxMHFnaEQ4d1lnUhILCNuhsLYGEPDUj1gaCAoGCKi86KQBEjc6NSIz44G+44KC44Gq44GP55Sf5pS+6YCB44Kv44Or44O844K644GM5Yiw552A44GX44G+44GZ";
