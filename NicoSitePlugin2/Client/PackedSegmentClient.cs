@@ -28,6 +28,11 @@ namespace NicoSitePlugin2.Client
         {
             await _streamReceiver.ReceiveAsync(_uri);
             isDisconnect = true;
+            if (_streamReceiver.UnexpectedDisconnect)
+            {
+                await Task.CompletedTask;
+                return;
+            }
 
             var segment = PackedSegment.Parser.ParseFrom(_streamReceiver.getBuffers());
             await _onDisconnect(segment);
