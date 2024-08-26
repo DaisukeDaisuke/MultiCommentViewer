@@ -14,8 +14,9 @@ namespace NicoSitePlugin2.Client
         private string _uri;
         private StreamReceiver _streamReceiver;
         private bool isDisconnect = false;
+        private Func<Task> _onNetworkError;
 
-        public PackedSegmentClient(string uri, Func<PackedSegment, Task> onDisconnect)
+        public PackedSegmentClient(string uri, Func<PackedSegment, Task> onDisconnect, Func<Task> onNetworkError)
         {
             _uri = uri;
             _onDisconnect = onDisconnect;
@@ -30,6 +31,7 @@ namespace NicoSitePlugin2.Client
             isDisconnect = true;
             if (_streamReceiver.UnexpectedDisconnect)
             {
+                await _onNetworkError();
                 await Task.CompletedTask;
                 return;
             }

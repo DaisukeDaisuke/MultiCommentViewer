@@ -761,7 +761,7 @@ namespace NicoSitePlugin
                     await Task.CompletedTask;
                     return;
                 }
-                var client = new PackedSegmentClient(uri, ProcessPackedSegment);
+                var client = new PackedSegmentClient(uri, ProcessPackedSegment, OnUnexpectedDisconnect);
                 await client.doConnect();//切断時にProcessPackedSegmentが呼ばれる
             }
             else if (entry.Segment != null)
