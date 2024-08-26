@@ -1,4 +1,4 @@
-name: .NET Desktop App Build v${{ github.event.inputs.tagname }}
+name: .NET Desktop App Build
 
 on:
   workflow_dispatch:
