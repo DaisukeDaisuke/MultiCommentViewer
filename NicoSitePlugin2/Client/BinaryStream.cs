@@ -9,7 +9,7 @@ namespace NicoSitePlugin2.Client
     public class BinaryStream
     {
         private List<byte> _buffer;
-        private int _offset;
+        private int _offset = 0;
 
         public BinaryStream()//byte[] data
         {
@@ -67,7 +67,7 @@ namespace NicoSitePlugin2.Client
 
         public IEnumerable<byte[]> Read()
         {
-            int offset = 0;
+            int offset = _offset;
 
             while (true)
             {
@@ -99,5 +99,4 @@ namespace NicoSitePlugin2.Client
             //}
         }
     }
-
 }
