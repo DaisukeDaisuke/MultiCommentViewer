@@ -592,7 +592,7 @@ namespace NicoSitePlugin
         DataProps _dataProps;
         private bool _disposedValue;
         private int _PackedServerConnectionCount = 0;
-        private int _PreviousdServerConnectionCount = 0;
+        private int _PreviousServerConnectionCount = 0;
         private MessageServerClient? _messageServerClient = null;
 
         private void MetaProvider_Received(object sender, Metadata.IMetaMessage e)
@@ -663,7 +663,7 @@ namespace NicoSitePlugin
                         _messageServerClient = new MessageServerClient(messageServer.MessageServerUrl, ProcessChunkedEntry, OnUnexpectedDisconnect);
                         var task = _messageServerClient.doConnect();
                         _PackedServerConnectionCount = 0;
-                        _PreviousdServerConnectionCount = 0;
+                        _PreviousServerConnectionCount = 0;
                         _toAdd.Add(task);
                         break;
                     case Metadata.ErrorMessage errorMessage:
@@ -742,12 +742,12 @@ namespace NicoSitePlugin
                 {
                     _segmentServers = new List<SegmentServerClient>();
                 }
-                if (_PreviousdServerConnectionCount > 1)
+                if (_PreviousServerConnectionCount > 1)
                 {
                     await Task.CompletedTask;
                     return;
                 }
-                ++_PreviousdServerConnectionCount;
+                ++_PreviousServerConnectionCount;
                 var segmentServer = new SegmentServerClient(Uri, ProcessChunkedMessage, OnUnexpectedDisconnect, true);
                 _segmentServers.Add(segmentServer);
                 var task = segmentServer.doConnect();
