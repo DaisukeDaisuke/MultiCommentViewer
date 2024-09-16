@@ -740,6 +740,11 @@ namespace NicoSitePlugin
                 {
                     _segmentServers = new List<SegmentServerClient>();
                 }
+                if (_PackedServerConnectionCount > 1)
+                {
+                    await Task.CompletedTask;
+                    return;
+                }
                 var segmentServer = new SegmentServerClient(Uri, ProcessChunkedMessage, OnUnexpectedDisconnect, true);
                 _segmentServers.Add(segmentServer);
                 var task = segmentServer.doConnect();
@@ -842,15 +847,6 @@ namespace NicoSitePlugin
 
         public async Task ProcessChunkedMessage(ChunkedMessage message, bool isInitialCommentsReceiving = false)
         {
-            //この棒読み暴走対策意味なかった
-            //if (!isInitialCommentsReceiving&&_isInitialCommentsReceiving == true)
-            //{
-            //    _isInitialCommentsReceiving = false;
-            //}
-            //if(isInitialCommentsReceiving == true&&_isInitialCommentsReceiving == false)
-            //{
-            //    isInitialCommentsReceiving = false;
-            //}
             if (_messageServerClient == null)
             {
                 await Task.CompletedTask;
