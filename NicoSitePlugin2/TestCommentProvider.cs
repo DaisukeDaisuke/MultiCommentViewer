@@ -742,7 +742,7 @@ namespace NicoSitePlugin
                 {
                     _segmentServers = new List<SegmentServerClient>();
                 }
-                if (_PreviousServerConnectionCount > 1)
+                if (_PreviousServerConnectionCount >= 1)
                 {
                     await Task.CompletedTask;
                     return;
