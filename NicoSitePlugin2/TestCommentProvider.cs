@@ -1369,11 +1369,15 @@ namespace NicoSitePlugin
                 _segmentServers = new List<SegmentServerClient>();
             }
             _toAdd.RemoveAll(task => task.IsCompleted);//ここで使い終わったクライアントをGCしておく
-            if (_mainLooptcs != null&&!_mainLooptcs.Task.IsCompleted)
+            try
             {
                 _mainLooptcs.SetResult(null);
             }
-            if(_DelayCancelSource != null)
+            catch (Exception)
+            {
+                // 例外を無視
+            }
+            if (_DelayCancelSource != null)
             {
                 _DelayCancelSource.Cancel();
             }
