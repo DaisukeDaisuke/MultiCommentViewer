@@ -1254,6 +1254,16 @@ namespace NicoSitePlugin
                 };
 
                 var user = GetUser(userId);
+
+                if (_siteOptions.IsAutoSetNickname)
+                {
+                    var nick = SitePluginCommon.Utils.ExtractNickname(content);
+                    if (!string.IsNullOrEmpty(nick))
+                    {
+                        user.Nickname = nick;
+                    }
+                }
+
                 bool isFirstComment;
                 if (_userCommentCountDict.ContainsKey(userId))
                 {
