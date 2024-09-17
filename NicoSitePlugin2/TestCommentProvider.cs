@@ -1371,7 +1371,10 @@ namespace NicoSitePlugin
             _toAdd.RemoveAll(task => task.IsCompleted);//ここで使い終わったクライアントをGCしておく
             try
             {
-                _mainLooptcs.SetResult(null);
+                if (_mainLooptcs != null)
+                {
+                    _mainLooptcs.SetResult(null);
+                }
             }
             catch (Exception)
             {
