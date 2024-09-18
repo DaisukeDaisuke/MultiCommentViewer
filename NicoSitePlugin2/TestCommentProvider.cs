@@ -294,7 +294,7 @@ namespace NicoSitePlugin
                     _tasks.Clear();//本当はchatのTaskだけ取り除きたいけど、変数に取ってなくて無理だから全部消しちゃう
                 }
             }
-            _tasks.Clear();//これしとかないと、配信終了時のセッションの孤独(ゾンビ)な_mainLooptcsが残留して、2回目切断時にデッドロックする
+            _tasks.Clear();//これしとかないと、配信終了時の自動切断機能が働いた時に、孤独(ゾンビ)な_mainLooptcsが残留して、2回目切断時にデッドロックする
             return;
         }
 
