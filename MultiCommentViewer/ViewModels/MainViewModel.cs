@@ -1385,16 +1385,17 @@ namespace MultiCommentViewer
             {
                 return null;
             }
-            var match = Regex.Match(message, "(https?://([\\w-]+.)+[\\w-]+(?:/[\\w- ./?%&=]))?");
+            var match = Regex.Match(message, @"https?://[\w.-]+(?:/[\w./?%&=-]*)?");
             if (match.Success)
             {
-                return match.Groups[1].Value;
+                return match.Value;
             }
             return null;
         }
         private void OpenUrl()
         {
             var url = GetUrlFromSelectedComment();
+            if (url == null) return;
             Process.Start(url);
             SetSystemInfo("open: " + url, InfoType.Debug);
         }
