@@ -46,7 +46,12 @@ namespace MultiCommentViewer
             };
         }
 
-
+        private void ContextMenu_Opened(object sender, RoutedEventArgs e)
+        {
+            if (sender is ContextMenu contextMenu) {
+                contextMenu.DataContext = Application.Current.MainWindow.DataContext;
+            }
+        }
 
         public bool IsShowUserInfoMenuItem
         {
