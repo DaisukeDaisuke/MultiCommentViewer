@@ -60,7 +60,7 @@
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="{Binding SelectedRowForeColor}" />
                 <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="{Binding SelectedRowBackColor}"/>
                 <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="{Binding SelectedRowForeColor}"/>
-                <ContextMenu x:Key="commentContext" DataContext="{Binding DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Window}}}">
+                <ContextMenu x:Key="commentContext" Opened="ContextMenu_Opened">
                     <MenuItem Header="コメントをコピー" Command="{Binding CommentCopyCommand}" />
                     <MenuItem Header="URLを開く" Command="{Binding OpenUrlCommand}" />
                     <MenuItem Header="日本語に翻訳する" Command="{Binding TranslateCommand}" />
