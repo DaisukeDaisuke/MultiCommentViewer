@@ -1375,7 +1375,9 @@ namespace MultiCommentViewer
         }
         private string GetUrlFromSelectedComment()
         {
-            var selectedComment = SelectedComment;
+            // CopyComment と同じ理由
+            var commentDataGrid = GetActiveWindowContextAsCommentDataGrid();
+            var selectedComment = commentDataGrid.SelectedComment;
             if (selectedComment == null)
             {
                 return null;
@@ -1401,13 +1403,26 @@ namespace MultiCommentViewer
         }
         private void CopyComment()
         {
-            var message = SelectedComment.MessageItems.ToText();
+            // 本当はこのModel (this) が CommentDataGridViewModelBase を継承しているのでこんなのは不要だが
+            // CommentDataGrid 用のコードが UserView に無いのでこうなっている (中途半端な共通化の埋め合わせ)
+            var commentDataGrid = GetActiveWindowContextAsCommentDataGrid();
+
+            var message = commentDataGrid.SelectedComment.MessageItems.ToText();
             try
             {
                 System.Windows.Clipboard.SetText(message);
             }
             catch (System.Runtime.InteropServices.COMException) { }
             SetSystemInfo("copy: " + message, InfoType.Debug);
+        }
+        
+        private static CommentDataGridViewModelBase GetActiveWindowContextAsCommentDataGrid()
+        {
+            var activeWindow = Application.Current.Windows
+                .OfType<Window>()
+                .SingleOrDefault(x => x.IsActive);
+
+            return activeWindow.DataContext as CommentDataGridViewModelBase;
         }
         #region ConnectionsView
         #region ConnectionsViewSelection
