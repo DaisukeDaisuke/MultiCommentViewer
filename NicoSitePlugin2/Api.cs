@@ -39,12 +39,13 @@ namespace NicoSitePlugin
 
         public static async Task<UserLiveInfo[]> GetCurrentUserLiveId(IDataSource server, CookieContainer cc, string UserId){
             //下記のAPIから、過去の放送や放送状況がとれる。
-            //"https://live.nicovideo.jp/front/api/v1/user-broadcast-history?providerId=userId&providerType=user&limit=1"
+            //"https://live.nicovideo.jp/front/api/v2/user-broadcast-history?providerId=48495285&providerType=user&isIncludeNonPublic=false&offset=0&limit=1&withTotalCount=true"
             //放送したことがない場合は
             //{"meta":{"status":200},"data":{"programsList":[],"hasNext":false,"totalCount":0}}
             //が返ってくる
 
-            var url = $"https://live.nicovideo.jp/front/api/v1/user-broadcast-history?providerId={UserId}&providerType=user&limit=1";
+            
+            var url = $"https://live.nicovideo.jp/front/api/v2/user-broadcast-history?providerId={UserId}&providerType=user&isIncludeNonPublic=false&offset=0&limit=1&withTotalCount=true";
             var res = await server.GetAsync(url, cc);
             dynamic d = JsonConvert.DeserializeObject(res);
             if (d.meta.status != 200)
