@@ -1,29 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using GalaSoft.MvvmLight.Command;
-using System.Windows.Input;
-using SitePlugin;
-using System.Threading;
-using System.Collections.ObjectModel;
-using Plugin;
-using System.Diagnostics;
-using System.Windows.Threading;
-using System.Windows.Media;
-using System.Reflection;
-using System.ComponentModel;
-using MultiCommentViewer.Test;
+﻿using CommentViewerCommon;
 using Common;
-using System.Windows.Data;
-using System.Text.RegularExpressions;
-using CommentViewerCommon;
+using GalaSoft.MvvmLight.Command;
+using MixchSitePlugin;
+using MultiCommentViewer.Test;
+using MultiCommentViewer.ViewModels;
+using NicoSitePlugin;
+using Plugin;
+using SitePlugin;
 using SitePluginCommon;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using NicoSitePlugin;
-using MixchSitePlugin;
+using System.Windows.Data;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace MultiCommentViewer
 {
@@ -128,6 +129,8 @@ namespace MultiCommentViewer
         public ICommand ClearAllCommentsCommand { get; }
         public ICommand CommentCopyCommand { get; }
         public ICommand OpenUrlCommand { get; }
+
+
 
         #endregion //Commands
 
@@ -1401,6 +1404,14 @@ namespace MultiCommentViewer
             Process.Start(url);
             SetSystemInfo("open: " + url, InfoType.Debug);
         }
+
+        // クッキー保存メソッド
+        private void SaveCookiesForSite(string siteName, string cookies)
+        {
+            // 設定ファイルやデータベースに保存
+            // 例: Properties.Settings.Default[$"{siteName}_Cookies"] = cookies;
+        }
+
         private void CopyComment()
         {
             // 本当はこのModel (this) が CommentDataGridViewModelBase を継承しているのでこんなのは不要だが
@@ -1773,6 +1784,8 @@ namespace MultiCommentViewer
             LoadedCommand = new RelayCommand(Loaded);
             CommentCopyCommand = new RelayCommand(CopyComment);
             OpenUrlCommand = new RelayCommand(OpenUrl);
+            
+
 
             _options.PropertyChanged += (s, e) =>
             {

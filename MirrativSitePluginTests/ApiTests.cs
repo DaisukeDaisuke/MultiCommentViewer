@@ -44,7 +44,7 @@ namespace MirrativSitePluginTests
             var serverMock = new Mock<IDataServer>();
             serverMock.Setup(s => s.GetAsync(url, It.IsAny<Dictionary<string, string>>())).Returns(Task.FromResult(data));
             var server = serverMock.Object;
-            var ret = await Api.GetLiveInfo(server, liveId);
+            var ret = await Api.GetLiveInfo(server, liveId, null);
             Assert.AreEqual("PUBG全力参加待ち(*´ー｀*)初見さんつかまえる #ハロウィンガチャ", ret.Title);
             Assert.AreEqual("118f91f:UdoBre1M", ret.Broadcastkey);
         }

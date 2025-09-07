@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using SitePluginCommon.AutoReconnection;
+using System.Net;
 
 namespace MirrativSitePlugin
 {
@@ -13,6 +14,8 @@ namespace MirrativSitePlugin
         private readonly IMirrativSiteOptions _siteOptions;
         private readonly MessageProvider2 _p1;
         private readonly MetadataProvider2 _p2;
+        private readonly CookieContainer _cc;
+
 
         public async Task<bool> CanConnectAsync()
         {
@@ -24,7 +27,7 @@ namespace MirrativSitePlugin
             else if (Tools.IsValidLiveId(input))
             {
                 var liveId = Tools.ExtractLiveId(input);
-                var liveInfo = await Api.GetLiveInfo(_server, liveId);
+                var liveInfo = await Api.GetLiveInfo(_server, liveId, _cc);
                 return liveInfo.IsLive;
             }
             else
@@ -57,7 +60,7 @@ namespace MirrativSitePlugin
                 //エラーメッセージ
                 return new List<IProvider>();
             }
-            var liveInfo = await Api.GetLiveInfo(_server, liveId);
+            var liveInfo = await Api.GetLiveInfo(_server, liveId, _cc);
             var broadcastKey = liveInfo.BcsvrKey;
             //var p1 = new MessageProvider2(new WebSocket("wss://online.mirrativ.com/"), _logger);
             //p1.MessageReceived += P1_MessageReceived;
@@ -77,7 +80,7 @@ namespace MirrativSitePlugin
 
         private async Task<string> GetLiveIdAsync(string userId)
         {
-            var userProfile = await Api.GetUserProfileAsync(_server, userId);
+            var userProfile = await Api.GetUserProfileAsync(_server, userId, _cc);
             if (!string.IsNullOrEmpty(userProfile.OnLiveLiveId))
             {
                 return userProfile.OnLiveLiveId;
@@ -87,7 +90,7 @@ namespace MirrativSitePlugin
                 return null;
             }
         }
-        public DummyImpl(IDataServer server, string input, ILogger logger, IMirrativSiteOptions siteOptions, MessageProvider2 p1, MetadataProvider2 p2)
+        public DummyImpl(IDataServer server, string input, ILogger logger, IMirrativSiteOptions siteOptions, MessageProvider2 p1, MetadataProvider2 p2, CookieContainer cc)
         {
             _server = server;
             _input = input;
@@ -95,6 +98,7 @@ namespace MirrativSitePlugin
             _siteOptions = siteOptions;
             _p1 = p1;
             _p2 = p2;
+            _cc = cc;
         }
     }
 }

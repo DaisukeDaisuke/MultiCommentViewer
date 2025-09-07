@@ -16,12 +16,15 @@ namespace MirrativSitePlugin
         private readonly ICommentOptions _options;
         private readonly IMirrativSiteOptions _siteOptions;
         private readonly IUserStoreManager _userStoreManager;
+        private CookieContainer _cc;
 
         public override async Task ConnectAsync(string input, IBrowserProfile browserProfile)
         {
             BeforeConnect();
+
             try
             {
+                _cc = GetCookieContainer(browserProfile);
                 await ConnectInternalAsync(input, browserProfile);
             }
             catch (Exception ex)
@@ -45,7 +48,7 @@ namespace MirrativSitePlugin
             if (Tools.IsValidUserId(input))
             {
                 var userId = Tools.ExtractUserId(input);
-                var userProfile = await Api.GetUserProfileAsync(_server, userId);
+                var userProfile = await Api.GetUserProfileAsync(_server, userId, _cc);
                 if (!string.IsNullOrEmpty(userProfile.OnLiveLiveId))
                 {
                     liveId = userProfile.OnLiveLiveId;
@@ -63,7 +66,7 @@ namespace MirrativSitePlugin
         public async Task InitAsync()
         {
             if (_isInitialized) return;
-            var p1 = new MessageProvider2(new WebSocket("wss://online.mirrativ.com/"), _logger);
+            var p1 = new MessageProvider2(new WebSocket("wss://online.mirrativ.com/", _cc), _logger, _cc);
             p1.MessageReceived += P1_MessageReceived;
             p1.MetadataUpdated += P1_MetadataUpdated;
             _p1 = p1;
@@ -83,7 +86,7 @@ namespace MirrativSitePlugin
             //p2.Master = p1;
             try
             {
-                var dummy = new DummyImpl(_server, input, _logger, _siteOptions, _p1, _p2);
+                var dummy = new DummyImpl(_server, input, _logger, _siteOptions, _p1, _p2, _cc);
                 var connectionManager = new ConnectionManager(_logger);
                 _autoReconnector = new NewAutoReconnector(connectionManager, dummy, new MessageUntara(), _logger);
 
@@ -91,7 +94,7 @@ namespace MirrativSitePlugin
                 var liveId = await GetCurrentLiveIdAsync(input);
                 if (!string.IsNullOrEmpty(liveId))
                 {
-                    var initialComments = await Api.GetLiveComments(_server, liveId);
+                    var initialComments = await Api.GetLiveComments(_server, liveId, _cc);
                     foreach (var c in initialComments)
                     {
                         var userId = c.UserId;
