@@ -77,7 +77,6 @@ namespace MultiCommentViewer.ViewModels
 
                 webView.CreationProperties = new CoreWebView2CreationProperties
                 {
-                    BrowserExecutableFolder = "WebView2",
                     UserDataFolder = userDataFolder
                 };
 

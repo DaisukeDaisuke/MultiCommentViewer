@@ -58,7 +58,6 @@
     <PackageReference Include="System.ComponentModel.Composition" Version="5.0.0" />
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.114.3" />
     <PackageReference Include="System.Text.Json" Version="9.0.8" />
-    <PackageReference Include="WebView2.Runtime.X64" Version="139.0.3405.125" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BigoIF\BigoIF.csproj" />
