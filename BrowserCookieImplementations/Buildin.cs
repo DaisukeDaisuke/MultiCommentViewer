@@ -20,13 +20,6 @@ namespace ryu_s.BrowserCookie
             profiles.Add(new BuildinProfile("default"));
             return profiles;
         }
-
-        private string GetCookieFolder()
-        {
-            var exeDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
-                         ?? AppDomain.CurrentDomain.BaseDirectory;
-            return Path.Combine(exeDir, "Cookies");
-        }
     }
 
     public class BuildinProfile : IBrowserProfile
