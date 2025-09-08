@@ -478,34 +478,20 @@ namespace MultiCommentViewer
                 var loginWindow = new LoginWindow(site, loginUrl);
                 loginWindow.Owner = Application.Current.MainWindow;
 
-                // Show()前にTaskが既に完了しているかチェック
-                var completionTask = loginWindow.WaitForCompletionAsync();
-                if (completionTask.IsCompleted)
-                {
-                    // 既に完了している場合はエラーの可能性が高い
-                    var result = await completionTask;
-                    if (!result.IsCompleted)
-                    {
-                        MessageBox.Show($"初期化エラー: {result.ErrorMessage}", "エラー",
-                            MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
-                    }
-                }
-
                 // ShowDialog() の代わりに Show() を使用
                 loginWindow.Show();
 
                 // 非同期でログイン完了を待つ
-                var finalResult = await completionTask;
+                var result = await loginWindow.WaitForCompletionAsync();
 
-                if (finalResult.IsCompleted)
+                if (result.IsCompleted)
                 {
                     MessageBox.Show("ログインデーターの取得が完了しました。ブラウザを「buildin(default)」にして、コメビュを再起動してください", "情報",
                         MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-                else if (!string.IsNullOrEmpty(finalResult.ErrorMessage))
+                else if (!string.IsNullOrEmpty(result.ErrorMessage))
                 {
-                    MessageBox.Show($"ログインエラー: {finalResult.ErrorMessage}", "エラー",
+                    MessageBox.Show($"ログインエラー: {result.ErrorMessage}", "エラー",
                         MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
