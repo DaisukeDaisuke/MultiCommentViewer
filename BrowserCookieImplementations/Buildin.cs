@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
@@ -70,20 +69,19 @@ namespace ryu_s.BrowserCookie
 
         private List<Cookie> LoadAllCookies(string file)
         {
-            var cookieList = new List<Cookie>();
+            var List = new List<Cookie>();
 
             var path1 = System.IO.Path.Combine(Path, file);
 
             if (!File.Exists(path1))
             {
-                return cookieList;
+                return List;
             }
 
             try
             {
-                // 暗号化されたファイルを読み込み
-                var encrypted = File.ReadAllBytes(path1);
-                var json = Encoding.UTF8.GetString(encrypted);
+                // 暗号化なしでテキストとして読み込む
+                var json = File.ReadAllText(path1, Encoding.UTF8);
 
                 // JSON を CookieDto のリストにデシリアライズ
                 var cookieDtos = JsonSerializer.Deserialize<List<CookieDto>>(json);
@@ -106,7 +104,7 @@ namespace ryu_s.BrowserCookie
                             cookie.HttpOnly = dto.IsHttpOnly;
                             cookie.Secure = dto.IsSecure;
 
-                            cookieList.Add(cookie);
+                            List.Add(cookie);
                         }
                         catch (Exception)
                         {
@@ -120,7 +118,7 @@ namespace ryu_s.BrowserCookie
                 // 復号化エラーまたはJSONパースエラーの場合は空のリストを返す
             }
 
-            return cookieList;
+            return List;
         }
 
         private bool IsHostMatch(string cookieDomain, string requestDomain)
@@ -163,7 +161,7 @@ namespace ryu_s.BrowserCookie
         {
             var exeDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
                          ?? AppDomain.CurrentDomain.BaseDirectory;
-            var folder = System.IO.Path.Combine(exeDir, "Cookies");
+            var folder = System.IO.Path.Combine(exeDir, "LocalCache");
             Directory.CreateDirectory(folder);
             return folder;
         }

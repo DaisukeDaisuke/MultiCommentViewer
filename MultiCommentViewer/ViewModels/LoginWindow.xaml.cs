@@ -171,17 +171,14 @@ namespace MultiCommentViewer.ViewModels
             {
                 var cookieManager = WebView.CoreWebView2.CookieManager;
                 var cookies = await cookieManager.GetCookiesAsync(null);
-
-                // 保存（暗号化）
-                await CookieStorage.SaveCookiesEncryptedAsync(cookies, _siteName);
+                await LocalCache.WriteAsync(cookies, _siteName);
 
                 // Cookie 文字列を既存のロジックと互換させたい場合は組み替え
                 var cookieString = string.Join("; ", System.Linq.Enumerable.Select(cookies, c => $"{c.Name}={c.Value}"));
 
                 var result = new LoginResult
                 {
-                    IsCompleted = true,
-                    Cookies = cookieString
+                    IsCompleted = true
                 };
 
                 _completionSource.SetResult(result);
@@ -230,7 +227,6 @@ namespace MultiCommentViewer.ViewModels
     public class LoginResult
     {
         public bool IsCompleted { get; set; }
-        public string Cookies { get; set; }
         public string ErrorMessage { get; set; }
     }
 }
