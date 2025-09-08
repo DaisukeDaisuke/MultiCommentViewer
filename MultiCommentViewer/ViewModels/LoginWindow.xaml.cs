@@ -59,15 +59,13 @@ namespace MultiCommentViewer.ViewModels
             var webView = new WebView2();
 
             // exe のあるフォルダを取得
-            var exeDir = System.IO.Path.GetDirectoryName(
-                System.Reflection.Assembly.GetExecutingAssembly().Location
-            );
+            var exeDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly()?.Location)
+                         ?? AppDomain.CurrentDomain.BaseDirectory;
 
-            // 各WebViewに独自のユーザーデータフォルダを作成
             var userDataFolder = System.IO.Path.Combine(
                 exeDir,
                 "Browser",
-                $"profile_{Guid.NewGuid()}"
+                $"profile"
             );
 
             System.IO.Directory.CreateDirectory(userDataFolder);
