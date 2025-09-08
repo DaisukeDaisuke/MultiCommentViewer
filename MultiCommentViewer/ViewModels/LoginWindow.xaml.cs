@@ -150,7 +150,7 @@ namespace MultiCommentViewer.ViewModels
                     }
                 };
 
-                var env = await CoreWebView2Environment.CreateAsync(userDataFolder: _userDataFolder);
+                var env = await CoreWebView2Environment.CreateAsync(browserExecutableFolder: "\\dll\\WebView2\\", userDataFolder: _userDataFolder);//\\を消すとウイルス検知される。
                 await WebView.EnsureCoreWebView2Async(env);
             }
             catch (Exception ex)
