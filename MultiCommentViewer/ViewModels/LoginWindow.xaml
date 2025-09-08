@@ -12,8 +12,6 @@
 
         <TextBlock Grid.Row="0" Margin="10"><Run Text="ログインしてください。完了したら「完了」ボタンを押してください。"/><Run Language="ja-jp" Text="既にログイン済みの場合そのまま完了を押してください"/></TextBlock>
 
-        <wv2:WebView2 x:Name="WebView" Grid.Row="1" Margin="10"/>
-
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
             <Button Content="完了" Click="CompleteButton_Click" Width="80" Height="30" Margin="5"/>
             <Button Content="キャンセル" Click="CancelButton_Click" Width="80" Height="30" Margin="5"/>
