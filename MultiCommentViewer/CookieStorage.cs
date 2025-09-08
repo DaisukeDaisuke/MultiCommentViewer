@@ -99,11 +99,8 @@ namespace MultiCommentViewer
             var json = System.Text.Json.JsonSerializer.Serialize(list);
             var bytes = Encoding.UTF8.GetBytes(json);
 
-            // DPAPI を使って暗号化（LocalMachine スコープ：同一マシン上の別プロセスでも復号可能）
-            var encrypted = ProtectedData.Protect(bytes, optionalEntropy: null, scope: DataProtectionScope.LocalMachine);
-
             var path = GetCookieFilePath(siteName);
-            File.WriteAllBytes(path, encrypted);
+            File.WriteAllBytes(path, bytes);
         }
 
     //    // 暗号化ファイルを復号して CookieContainer を返す

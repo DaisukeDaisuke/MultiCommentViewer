@@ -83,10 +83,7 @@ namespace ryu_s.BrowserCookie
             {
                 // 暗号化されたファイルを読み込み
                 var encrypted = File.ReadAllBytes(path1);
-
-                // DPAPI で復号
-                var bytes = ProtectedData.Unprotect(encrypted, optionalEntropy: null, scope: DataProtectionScope.LocalMachine);
-                var json = Encoding.UTF8.GetString(bytes);
+                var json = Encoding.UTF8.GetString(encrypted);
 
                 // JSON を CookieDto のリストにデシリアライズ
                 var cookieDtos = JsonSerializer.Deserialize<List<CookieDto>>(json);
