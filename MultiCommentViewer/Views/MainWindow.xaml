@@ -314,9 +314,22 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
+                    <!-- 既存の「切断」列の後に追加 -->
+                    <DataGridTemplateColumn
+                        Header="ログイン"
+                        DisplayIndex="{Binding DataContext.ConnectionsViewLoginDisplayIndex, Mode=TwoWay, Source={x:Reference dummyElement}, FallbackValue=7}"
+                        Width="{Binding DataContext.ConnectionsViewLoginWidth, Mode=TwoWay, Source={x:Reference dummyElement}, Converter={StaticResource dataGridLengthConverter}}"
+                        Visibility="{Binding DataContext.IsShowConnectionsViewLogin, Source={x:Reference dummyElement}, Converter={StaticResource booleanToVisibilityConverter}}"
+                        >
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Margin="5,0" Content="ログイン" IsEnabled="{Binding CanLogin}" Command="{Binding LoginCommand}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                     <DataGridTemplateColumn
                         Header="保存"
-                        DisplayIndex="{Binding DataContext.ConnectionsViewSaveDisplayIndex, Mode=TwoWay, Source={x:Reference dummyElement}, FallbackValue=7}"
+                        DisplayIndex="{Binding DataContext.ConnectionsViewSaveDisplayIndex, Mode=TwoWay, Source={x:Reference dummyElement}, FallbackValue=8}"
                         Width="{Binding DataContext.ConnectionsViewSaveWidth, Mode=TwoWay, Source={x:Reference dummyElement}, Converter={StaticResource dataGridLengthConverter}}"
                         Visibility="{Binding DataContext.IsShowConnectionsViewSave, Source={x:Reference dummyElement}, Converter={StaticResource booleanToVisibilityConverter}}"
                         >
@@ -328,7 +341,7 @@
                     </DataGridTemplateColumn>
                     <DataGridTemplateColumn
                         Header="ログインユーザ名"
-                        DisplayIndex="{Binding DataContext.ConnectionsViewLoggedinUsernameDisplayIndex, Mode=TwoWay, Source={x:Reference dummyElement}, FallbackValue=8}"
+                        DisplayIndex="{Binding DataContext.ConnectionsViewLoggedinUsernameDisplayIndex, Mode=TwoWay, Source={x:Reference dummyElement}, FallbackValue=9}"
                         Width="{Binding DataContext.ConnectionsViewLoggedinUsernameWidth, Mode=TwoWay, Source={x:Reference dummyElement}, Converter={StaticResource dataGridLengthConverter}}"
                         Visibility="{Binding DataContext.IsShowConnectionsViewLoggedinUsername, Source={x:Reference dummyElement}, Converter={StaticResource booleanToVisibilityConverter}}"
 
@@ -342,7 +355,7 @@
 
                     <DataGridTemplateColumn
                         Header="接続背景色"
-                        DisplayIndex="{Binding DataContext.ConnectionsViewConnectionBackgroundDisplayIndex, Mode=TwoWay, Source={x:Reference dummyElement}, FallbackValue=9}"
+                        DisplayIndex="{Binding DataContext.ConnectionsViewConnectionBackgroundDisplayIndex, Mode=TwoWay, Source={x:Reference dummyElement}, FallbackValue=10}"
                         Width="{Binding DataContext.ConnectionsViewConnectionBackgroundWidth, Mode=TwoWay, Source={x:Reference dummyElement}, Converter={StaticResource dataGridLengthConverter}}"
                         Visibility="{Binding DataContext.IsShowConnectionsViewConnectionBackground, Source={x:Reference dummyElement}, Converter={StaticResource booleanToVisibilityConverter}}"
                         >
@@ -354,7 +367,7 @@
                     </DataGridTemplateColumn>
                     <DataGridTemplateColumn
                         Header="接続文字色"
-                        DisplayIndex="{Binding DataContext.ConnectionsViewConnectionForegroundDisplayIndex, Mode=TwoWay, Source={x:Reference dummyElement}, FallbackValue=10}"
+                        DisplayIndex="{Binding DataContext.ConnectionsViewConnectionForegroundDisplayIndex, Mode=TwoWay, Source={x:Reference dummyElement}, FallbackValue=11}"
                         Width="{Binding DataContext.ConnectionsViewConnectionForegroundWidth, Mode=TwoWay, Source={x:Reference dummyElement}, Converter={StaticResource dataGridLengthConverter}}"
                         Visibility="{Binding DataContext.IsShowConnectionsViewConnectionForeground, Source={x:Reference dummyElement}, Converter={StaticResource booleanToVisibilityConverter}}"
                         >

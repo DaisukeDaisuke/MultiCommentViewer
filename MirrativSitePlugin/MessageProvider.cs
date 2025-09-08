@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
 using System.Threading.Tasks;
 using Common;
 using SitePlugin;
@@ -193,6 +194,7 @@ namespace MirrativSitePlugin
 
         private readonly IWebSocket _webSocket;
         private readonly ILogger _logger;
+        private readonly CookieContainer _cc;
         public string BroadcastKey { get; set; }
 
         public event EventHandler<IMirrativMessage> MessageReceived;
@@ -207,10 +209,11 @@ namespace MirrativSitePlugin
         {
             _webSocket.Disconnect();
         }
-        public MessageProvider2(IWebSocket webSocket, ILogger logger)
+        public MessageProvider2(IWebSocket webSocket, ILogger logger, CookieContainer cc)
         {
             _webSocket = webSocket;
             _logger = logger;
+            _cc = cc;
             webSocket.Opened += WebSocket_Opened;
             webSocket.Received += WebSocket_Received;
         }

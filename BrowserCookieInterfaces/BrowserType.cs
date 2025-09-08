@@ -9,6 +9,7 @@
         Edge,
         Opera,
         OperaGx,
+        Buildin,
         Unknown,
     }
 }

@@ -31,18 +31,18 @@ namespace MirrativSitePlugin
             }
             return currentUser;
         }
-        public static async Task<ILiveInfo> PollLiveAsync(IDataServer server, string liveId)
+        public static async Task<ILiveInfo> PollLiveAsync(IDataServer server, string liveId, CookieContainer cc)
         {
             //https://www.mirrativ.com/api/live/live_polling?live_id=qnLD1dkSheKqylMKKD5hOA
             var url = "https://www.mirrativ.com/api/live/live_polling?live_id=" + liveId;
-            var res = await server.GetAsync(url, null);
+            var res = await server.GetAsync(url, null, cc);
             var obj = Tools.Deserialize<Low.LiveInfo.RootObject>(res);
             return new LiveInfo(obj);
         }
-        public static async Task<List<Message>> GetLiveComments(IDataServer server, string liveId)
+        public static async Task<List<Message>> GetLiveComments(IDataServer server, string liveId, CookieContainer cc)
         {
             var url = "https://www.mirrativ.com/api/live/live_comments?live_id=" + liveId;
-            var res = await server.GetAsync(url, null);
+            var res = await server.GetAsync(url, null, cc);
             var obj = Tools.Deserialize<Low.LiveComments.RootObject>(res);
             var list = new List<Message>();
             foreach(var c in obj.Comments)
@@ -61,21 +61,21 @@ namespace MirrativSitePlugin
             list.Reverse();
             return list;
         }
-        public static async Task<ILiveInfo> GetLiveInfo(IDataServer server, string liveId)
+        public static async Task<ILiveInfo> GetLiveInfo(IDataServer server, string liveId, CookieContainer cc)
         {
             if (string.IsNullOrEmpty(liveId))
             {
                 throw new ArgumentNullException(nameof(liveId));
             }
             var url = "https://www.mirrativ.com/api/live/live?live_id=" + liveId;
-            var res = await server.GetAsync(url, null);
+            var res = await server.GetAsync(url, null, cc);
             var obj = Tools.Deserialize<Low.LiveInfo.RootObject>(res);
             return new LiveInfo(obj);
         }
-        public static async Task<UserProfile> GetUserProfileAsync(IDataServer server, string userId)
+        public static async Task<UserProfile> GetUserProfileAsync(IDataServer server, string userId, CookieContainer cc)
         {
             var url = "https://www.mirrativ.com/api/user/profile?user_id=" + userId;
-            var res = await server.GetAsync(url, null);
+            var res = await server.GetAsync(url, null, cc);
             var obj = Tools.Deserialize<Low.UserProfile.RootObject>(res);
             return new UserProfile(obj);
         }
