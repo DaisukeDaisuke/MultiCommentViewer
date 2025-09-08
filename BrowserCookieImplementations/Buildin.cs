@@ -16,7 +16,7 @@ namespace ryu_s.BrowserCookie
         public List<IBrowserProfile> GetProfiles()
         {
             var profiles = new List<IBrowserProfile>();
-            profiles.Add(new BuildinProfile("default"));
+            profiles.Add(new BuildinProfile());
             return profiles;
         }
     }
@@ -27,10 +27,9 @@ namespace ryu_s.BrowserCookie
         public string ProfileName { get; }
         public BrowserType Type => BrowserType.Buildin;
 
-        public BuildinProfile(string profileName)
+        public BuildinProfile()
         {
-            ProfileName = profileName ?? "default";
-            Path = GetCookieFilePath(ProfileName);
+            Path = GetLocalCacheFilePath();
         }
 
         public Cookie GetCookie(string domain, string name)
@@ -53,10 +52,10 @@ namespace ryu_s.BrowserCookie
                 _ => "unknown" // これがあると安全です
             };
 
-            var allCookies = LoadAllCookies(fileName);
+            var allLocalCaches = LoadAllLocalCaches(fileName);
             var result = new List<Cookie>();
 
-            foreach (var cookie in allCookies) {
+            foreach (var cookie in allLocalCaches) {
                 // ドメインマッチングロジック
                 if (IsHostMatch(cookie.Domain, domain))
                 {
@@ -67,7 +66,7 @@ namespace ryu_s.BrowserCookie
             return result;
         }
 
-        private List<Cookie> LoadAllCookies(string file)
+        private List<Cookie> LoadAllLocalCaches(string file)
         {
             var List = new List<Cookie>();
 
@@ -84,7 +83,7 @@ namespace ryu_s.BrowserCookie
                 var json = File.ReadAllText(path1, Encoding.UTF8);
 
                 // JSON を CookieDto のリストにデシリアライズ
-                var cookieDtos = JsonSerializer.Deserialize<List<CookieDto>>(json);
+                var cookieDtos = JsonSerializer.Deserialize<List<LocalCacheDto>>(json);
 
                 if (cookieDtos != null)
                 {
@@ -158,7 +157,7 @@ namespace ryu_s.BrowserCookie
             return false;
         }
 
-        private string GetCookieFilePath(string siteName)
+        private string GetLocalCacheFilePath()
         {
             var exeDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly()?.Location)
                          ?? AppDomain.CurrentDomain.BaseDirectory;
@@ -169,7 +168,7 @@ namespace ryu_s.BrowserCookie
     }
 
     // CookieDto クラス（CookieStorage.cs から移動または重複定義）
-    public class CookieDto
+    public class LocalCacheDto
     {
         public string Name { get; set; }
         public string Value { get; set; }

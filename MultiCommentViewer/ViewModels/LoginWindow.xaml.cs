@@ -46,59 +46,69 @@ namespace MultiCommentViewer.ViewModels
             };
 
             var webView = CreateWebView2(url);
-            tabItem.Content = webView;
+            if (webView != null)
+            {
+                tabItem.Content = webView;
 
-            _tabControl.Items.Add(tabItem);
-            _tabControl.SelectedItem = tabItem;
-            _webViews.Add(webView);
+                _tabControl.Items.Add(tabItem);
+                _tabControl.SelectedItem = tabItem;
+                _webViews.Add(webView);
+            }
         }
 
         // WebView2を動的に作成
         private WebView2 CreateWebView2(string loginUrl)
         {
-            var webView = new WebView2();
-
-            // exe のあるフォルダを取得
-            var exeDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly()?.Location)
-                         ?? AppDomain.CurrentDomain.BaseDirectory;
-
-            var userDataFolder = System.IO.Path.Combine(
-                exeDir,
-                "Browser",
-                $"profile"
-            );
-
-            System.IO.Directory.CreateDirectory(userDataFolder);
-
-            webView.CreationProperties = new CoreWebView2CreationProperties
+            try
             {
-                BrowserExecutableFolder = "dll/WebView2",
-                UserDataFolder = userDataFolder
-            };
+                var webView = new WebView2();
 
-            // 初期化完了時の処理
-            webView.CoreWebView2InitializationCompleted += async (s, e) =>
-            {
-                if (e.IsSuccess)
-                {
-                    await SetupWebView(webView, loginUrl);
-                }
-                else
-                {
-                    MessageBox.Show($"WebView2 初期化失敗: {e.InitializationException.Message}");
-                }
-            };
+                // exe のあるフォルダを取得
+                var exeDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly()?.Location)
+                             ?? AppDomain.CurrentDomain.BaseDirectory;
 
-            // 非同期で初期化を開始
-            _ = Task.Run(async () =>
-            {
-                await Dispatcher.InvokeAsync(async () =>
+                var userDataFolder = System.IO.Path.Combine(
+                    exeDir,
+                    "Browser",
+                    $"profile"
+                );
+
+                System.IO.Directory.CreateDirectory(userDataFolder);
+
+                webView.CreationProperties = new CoreWebView2CreationProperties
                 {
-                    await webView.EnsureCoreWebView2Async();
+                    BrowserExecutableFolder = "dll/WebView2",
+                    UserDataFolder = userDataFolder
+                };
+
+                // 初期化完了時の処理
+                webView.CoreWebView2InitializationCompleted += async (s, e) =>
+                {
+                    if (e.IsSuccess)
+                    {
+                        await SetupWebView(webView, loginUrl);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"WebView2 初期化失敗: {e.InitializationException.Message}");
+                    }
+                };
+
+                // 非同期で初期化を開始
+                _ = Task.Run(async () =>
+                {
+                    await Dispatcher.InvokeAsync(async () =>
+                    {
+                        await webView.EnsureCoreWebView2Async();
+                    });
                 });
-            });
-
-            return webView;
+                return webView;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            return null;
         }
 
         // WebViewの設定
@@ -243,7 +253,7 @@ namespace MultiCommentViewer.ViewModels
                     }
                 }
 
-                await LocalCache.WriteAsync(allCookies, _siteName);
+                LocalCache.WriteCache(allCookies, _siteName);
 
                 var result = new LoginResult
                 {

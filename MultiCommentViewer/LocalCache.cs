@@ -12,10 +12,9 @@ namespace MultiCommentViewer
     using System.Collections.Generic;
     using System.IO;
     using System.Text;
-    using System.Threading.Tasks;
 
     // Cookie DTO（保存フォーマット）
-    public class CookieDto
+    public class LocalCacheDto
     {
         public string Name { get; set; }
         public string Value { get; set; }
@@ -55,9 +54,9 @@ namespace MultiCommentViewer
         }
 
         // CoreWebView2 の Cookie リストを DTO に変換して暗号化してファイルに保存
-        public static async Task WriteAsync(IEnumerable<CoreWebView2Cookie> cookies, string siteName)
+        public static void WriteCache(IEnumerable<CoreWebView2Cookie> cookies, string siteName)
         {
-            var list = new List<CookieDto>();
+            var list = new List<LocalCacheDto>();
             foreach (var c in cookies)
             {
                 // 修正版1: より安全なキャスト方法
@@ -79,7 +78,7 @@ namespace MultiCommentViewer
                     }
                 }
 
-                list.Add(new CookieDto
+                list.Add(new LocalCacheDto
                 {
                     Name = c.Name,
                     Value = c.Value,

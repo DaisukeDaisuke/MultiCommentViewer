@@ -466,7 +466,7 @@ namespace MultiCommentViewer
                 var loginUrl = GetLoginUrlForSite(site);
                 if (string.IsNullOrEmpty(loginUrl))
                 {
-                    MessageBox.Show("このサイトはログイン機能をサポートしていません。");
+                    MessageBox.Show("エラー: 押せないはずのボタン！");
                     return;
                 }
 
