@@ -47,6 +47,10 @@ jobs:
         copy ".\CommentGeneratorPlugin\bin\$env:Configuration\*" ".\Output\$env:Configuration\plugins\CommentGenerator"
         copy ".\YoyakuPlugin\bin\$env:Configuration\*" ".\Output\$env:Configuration\plugins\Yoyaku"
 
+    - name: move WebView2
+      run: |
+        robocopy ".\Output\$env:Configuration\dll\WebView2" ".\Output\$env:Configuration\WebView2" /E /MOVE
+
     - name:  zipping
       run: Compress-Archive -Path "./Output/$env:Configuration/*" -Destination 'MultiCommentViewer_v${{ github.event.inputs.tagname }}_stable.zip'
 
