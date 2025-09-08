@@ -310,7 +310,6 @@ namespace MirrativSitePlugin
         WebSocket4Net.WebSocket _ws;
         TaskCompletionSource<object> _tcs;
         private readonly string _url;
-        private readonly CookieContainer _cc;
 
         public Task ReceiveAsync()
         {
@@ -358,10 +357,9 @@ namespace MirrativSitePlugin
             _ws?.Close();
             _ws = null;
         }
-        public WebSocket(string url, CookieContainer cc)
+        public WebSocket(string url)
         {
             _url = url;
-            _cc = cc;
         }
     }
 }

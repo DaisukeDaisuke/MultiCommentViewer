@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using SitePluginCommon.AutoReconnection;
 using System.Net;
+using System.Diagnostics;
 
 namespace MirrativSitePlugin
 {
@@ -62,6 +63,7 @@ namespace MirrativSitePlugin
             }
             var liveInfo = await Api.GetLiveInfo(_server, liveId, _cc);
             var broadcastKey = liveInfo.BcsvrKey;
+            //Debug.WriteLine(broadcastKey);
             //var p1 = new MessageProvider2(new WebSocket("wss://online.mirrativ.com/"), _logger);
             //p1.MessageReceived += P1_MessageReceived;
             //p1.MetadataUpdated += P1_MetadataUpdated;

@@ -511,10 +511,10 @@ namespace MultiCommentViewer
             Debug.WriteLine(site);
             return site switch
             {
-                "Mirrativ" => "https://www.mirrativ.com/",
-                "YouTubeLive" => "https://example.com/",
+                "Mirrativ" => "www.mirrativ.com", // Mirrativ.bin
+                "YouTubeLive" => "www.youtube.com/@rabikemono/playlists", // YouTubeLive.bin
                 _ => null
-            };
+            } is string domain ? "https://" + domain : null;
         }
     }
     public class RenamedEventArgs : EventArgs

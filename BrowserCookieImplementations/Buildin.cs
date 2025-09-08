@@ -56,6 +56,7 @@ namespace ryu_s.BrowserCookie
             {
                 "mirrativ.com" => "Mirrativ.bin",
                 "www.mirrativ.com" => "Mirrativ.bin",
+                "youtube.com" => "YouTubeLive.bin",
                 null => "unknown",
                 _ => "unknown" // これがあると安全です
             };

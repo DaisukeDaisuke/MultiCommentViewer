@@ -106,44 +106,44 @@ namespace MultiCommentViewer
             File.WriteAllBytes(path, encrypted);
         }
 
-        // 暗号化ファイルを復号して CookieContainer を返す
-        public static CookieContainer LoadCookiesFromEncryptedFile(string siteName)
-        {
-            var path = GetCookieFilePath(siteName);
-            if (!File.Exists(path)) return new CookieContainer();
+    //    // 暗号化ファイルを復号して CookieContainer を返す
+    //    public static CookieContainer LoadCookiesFromEncryptedFile(string siteName)
+    //    {
+    //        var path = GetCookieFilePath(siteName);
+    //        if (!File.Exists(path)) return new CookieContainer();
 
-            var encrypted = File.ReadAllBytes(path);
+    //        var encrypted = File.ReadAllBytes(path);
 
-            // 復号
-            var bytes = ProtectedData.Unprotect(encrypted, optionalEntropy: null, scope: DataProtectionScope.LocalMachine);
-            var json = Encoding.UTF8.GetString(bytes);
+    //        // 復号
+    //        var bytes = ProtectedData.Unprotect(encrypted, optionalEntropy: null, scope: DataProtectionScope.LocalMachine);
+    //        var json = Encoding.UTF8.GetString(bytes);
 
-            var list = System.Text.Json.JsonSerializer.Deserialize<List<CookieDto>>(json);
-            var container = new CookieContainer();
+    //        var list = System.Text.Json.JsonSerializer.Deserialize<List<CookieDto>>(json);
+    //        var container = new CookieContainer();
 
-            if (list != null)
-            {
-                foreach (var dto in list)
-                {
-                    try
-                    {
-                        var cookie = new Cookie(dto.Name, dto.Value, dto.Path ?? "/", dto.Domain ?? "");
-                        if (dto.Expires.HasValue) cookie.Expires = dto.Expires.Value;
-                        cookie.HttpOnly = dto.IsHttpOnly;
-                        cookie.Secure = dto.IsSecure;
+    //        if (list != null)
+    //        {
+    //            foreach (var dto in list)
+    //            {
+    //                try
+    //                {
+    //                    var cookie = new Cookie(dto.Name, dto.Value, dto.Path ?? "/", dto.Domain ?? "");
+    //                    if (dto.Expires.HasValue) cookie.Expires = dto.Expires.Value;
+    //                    cookie.HttpOnly = dto.IsHttpOnly;
+    //                    cookie.Secure = dto.IsSecure;
 
-                        // CookieContainer.Add のドメイン取り扱いに注意：
-                        // domain は先頭にドットが必要な場合があるためそのまま渡す
-                        container.Add(cookie);
-                    }
-                    catch
-                    {
-                        // 無効な cookie があれば無視して続行
-                    }
-                }
-            }
+    //                    // CookieContainer.Add のドメイン取り扱いに注意：
+    //                    // domain は先頭にドットが必要な場合があるためそのまま渡す
+    //                    container.Add(cookie);
+    //                }
+    //                catch
+    //                {
+    //                    // 無効な cookie があれば無視して続行
+    //                }
+    //            }
+    //        }
 
-            return container;
-        }
+    //        return container;
+    //    }
     }
 }

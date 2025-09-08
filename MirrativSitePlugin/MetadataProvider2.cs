@@ -1,5 +1,6 @@
 ﻿using SitePluginCommon.AutoReconnection;
 using System;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,6 +19,7 @@ namespace MirrativSitePlugin
         public Task Work { get; private set; }
         public ProviderFinishReason FinishReason { get; private set; }
         public string LiveId { get; set; }
+        public CookieContainer _cc { get; set; }
         public void Start()
         {
             Work = ReceiveAsync();
@@ -43,7 +45,7 @@ namespace MirrativSitePlugin
 
         protected virtual async Task<ILiveInfo> GetLiveInfoAsync()
         {
-            return await Api.PollLiveAsync(_server, LiveId);
+            return await Api.PollLiveAsync(_server, LiveId, _cc);
         }
 
         protected virtual async Task Wait()
@@ -60,10 +62,11 @@ namespace MirrativSitePlugin
             _isDisconnectRequested = true;
             _cts?.Cancel();
         }
-        public MetadataProvider2(IDataServer server, IMirrativSiteOptions siteOptions)
+        public MetadataProvider2(IDataServer server, IMirrativSiteOptions siteOptions, CookieContainer cc)
         {
             _server = server;
             _siteOptions = siteOptions;
+            _cc = cc;
         }
     }
 }
