@@ -116,6 +116,7 @@ namespace ryu_s.BrowserCookie
             catch (Exception)
             {
                 // 復号化エラーまたはJSONパースエラーの場合は空のリストを返す
+                
             }
 
             return List;
@@ -159,7 +160,7 @@ namespace ryu_s.BrowserCookie
 
         private string GetCookieFilePath(string siteName)
         {
-            var exeDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
+            var exeDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly()?.Location)
                          ?? AppDomain.CurrentDomain.BaseDirectory;
             var folder = System.IO.Path.Combine(exeDir, "LocalCache");
             Directory.CreateDirectory(folder);

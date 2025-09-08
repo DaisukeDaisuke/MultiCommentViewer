@@ -32,9 +32,9 @@ namespace MultiCommentViewer
         // exe フォルダの Cookies サブフォルダを返す
         public static string GetCacheFolders()
         {
-            var exeDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
-                         ?? AppDomain.CurrentDomain.BaseDirectory;
-            var folder = Path.Combine(exeDir, "LocalCache");
+            var exeDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly()?.Location)
+             ?? AppDomain.CurrentDomain.BaseDirectory;
+            var folder = System.IO.Path.Combine(exeDir, "LocalCache");
             Directory.CreateDirectory(folder);
             return folder;
         }

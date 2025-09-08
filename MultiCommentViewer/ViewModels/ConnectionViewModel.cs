@@ -486,7 +486,7 @@ namespace MultiCommentViewer
 
                 if (result.IsCompleted)
                 {
-                    MessageBox.Show("ログインデーターの取得が完了しました。", "情報",
+                    MessageBox.Show("ログインデーターの取得が完了しました。ブラウザを「buildin(default)」にして、コメビュを再起動してください", "情報",
                         MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else if (!string.IsNullOrEmpty(result.ErrorMessage))
