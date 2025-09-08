@@ -182,11 +182,20 @@ namespace MultiCommentViewer.ViewModels
                 };
                 // 指定されたパスでWebView2環境を作成
                 var browserExecutableFolder = FindWebView2ExecutablePath();
-                var env = await CoreWebView2Environment.CreateAsync(
-                    browserExecutableFolder: browserExecutableFolder,
-                    userDataFolder: _userDataFolder);
-                await WebView.EnsureCoreWebView2Async(env);
-               
+                //Debug.WriteLine(browserExecutableFolder);
+                if (browserExecutableFolder == null)
+                {
+                    // デフォルトの動作にフォールバック
+                    var env = await CoreWebView2Environment.CreateAsync(userDataFolder: _userDataFolder);
+                    await WebView.EnsureCoreWebView2Async(env);
+                }
+                else
+                {
+                    var env = await CoreWebView2Environment.CreateAsync(
+                        browserExecutableFolder: browserExecutableFolder,
+                        userDataFolder: _userDataFolder);
+                    await WebView.EnsureCoreWebView2Async(env);
+                }
             }
             catch (Exception ex)
             {
