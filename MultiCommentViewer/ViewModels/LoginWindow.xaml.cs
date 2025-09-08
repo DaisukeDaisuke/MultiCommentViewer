@@ -172,7 +172,7 @@ namespace MultiCommentViewer.ViewModels
                     {
                         var result = new LoginResult
                         {
-                            IsCompleted = true,
+                            IsCompleted = false,
                             ErrorMessage = $"WebView2 初期化失敗: {e.InitializationException.Message}"
                         };
                         _completionSource.SetResult(result);
@@ -200,7 +200,7 @@ namespace MultiCommentViewer.ViewModels
             {
                 var result = new LoginResult
                 {
-                    IsCompleted = true,
+                    IsCompleted = false,
                     ErrorMessage = $"WebView2の初期化に失敗しました: {ex.Message}"
                 };
                 _completionSource.SetResult(result);
