@@ -1,6 +1,5 @@
 ﻿using Microsoft.Web.WebView2.Core;
 using System;
-
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -173,7 +172,7 @@ namespace MultiCommentViewer.ViewModels
                     {
                         var result = new LoginResult
                         {
-                            IsCompleted = false,
+                            IsCompleted = true,
                             ErrorMessage = $"WebView2 初期化失敗: {e.InitializationException.Message}"
                         };
                         _completionSource.SetResult(result);
@@ -201,7 +200,7 @@ namespace MultiCommentViewer.ViewModels
             {
                 var result = new LoginResult
                 {
-                    IsCompleted = false,
+                    IsCompleted = true,
                     ErrorMessage = $"WebView2の初期化に失敗しました: {ex.Message}"
                 };
                 _completionSource.SetResult(result);
