@@ -1,6 +1,5 @@
 ﻿using Microsoft.Web.WebView2.Core;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -26,35 +25,6 @@ namespace MultiCommentViewer.ViewModels
         public Task<LoginResult> WaitForCompletionAsync()
         {
             return _completionSource.Task;
-        }
-
-        private string FindWebView2ExecutablePath()
-        {
-            var basePaths = new[]
-            {
-                @"C:\Program Files (x86)\Microsoft\EdgeWebView\Application",
-                @"C:\Program Files\Microsoft\EdgeWebView\Application"
-            };
-
-            foreach (var basePath in basePaths)
-            {
-                if (System.IO.Directory.Exists(basePath))
-                {
-                    // 最新バージョンのフォルダを探す
-                    var versionDirs = System.IO.Directory.GetDirectories(basePath)
-                        .Where(d => System.Text.RegularExpressions.Regex.IsMatch(
-                            System.IO.Path.GetFileName(d), @"^\d+\.\d+\.\d+\.\d+$"))
-                        .OrderByDescending(d => new Version(System.IO.Path.GetFileName(d)))
-                        .ToArray();
-
-                    if (versionDirs.Length > 0)
-                    {
-                        return versionDirs[0]; // 最新バージョンを返す
-                    }
-                }
-            }
-
-            return null; // 見つからない場合
         }
 
         private async void InitializeWebView(string loginUrl)
@@ -179,22 +149,9 @@ namespace MultiCommentViewer.ViewModels
                         Close();
                     }
                 };
-                // 指定されたパスでWebView2環境を作成
-                var browserExecutableFolder = FindWebView2ExecutablePath();
-                //Debug.WriteLine(browserExecutableFolder);
-                if (browserExecutableFolder == null)
-                {
-                    // デフォルトの動作にフォールバック
-                    var env = await CoreWebView2Environment.CreateAsync(userDataFolder: _userDataFolder);
-                    await WebView.EnsureCoreWebView2Async(env);
-                }
-                else
-                {
-                    var env = await CoreWebView2Environment.CreateAsync(
-                        browserExecutableFolder: browserExecutableFolder,
-                        userDataFolder: _userDataFolder);
-                    await WebView.EnsureCoreWebView2Async(env);
-                }
+
+                var env = await CoreWebView2Environment.CreateAsync(userDataFolder: _userDataFolder);
+                await WebView.EnsureCoreWebView2Async(env);
             }
             catch (Exception ex)
             {
