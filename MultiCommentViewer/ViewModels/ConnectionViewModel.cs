@@ -514,7 +514,7 @@ namespace MultiCommentViewer
             return site switch
             {
                 "Mirrativ" => "www.mirrativ.com", // Mirrativ.bin
-                "YouTubeLive" => "www.youtube.com/watch?v=ZeZ049BUy8Q", // YouTubeLive.bin
+                "YouTubeLive" => "www.youtube.com/@rabikemono/playlists", // YouTubeLive.bin
                 _ => null
             } is string domain ? "https://" + domain : null;
         }

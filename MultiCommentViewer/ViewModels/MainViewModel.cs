@@ -20,6 +20,7 @@ using SitePluginCommon;
 using System.Windows;
 using System.Windows.Controls;
 using NicoSitePlugin;
+
 namespace MultiCommentViewer
 {
     class ColorPair
