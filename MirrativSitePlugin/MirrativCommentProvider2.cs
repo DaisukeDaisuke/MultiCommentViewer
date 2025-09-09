@@ -66,7 +66,7 @@ namespace MirrativSitePlugin
         public async Task InitAsync()
         {
             if (_isInitialized) return;
-            var p1 = new MessageProvider2(new WebSocket("wss://online.mirrativ.com/"), _logger, _cc);
+            var p1 = new MessageProvider2(new WebSocket("wss://online.mirrativ.com/"), _logger);
             p1.MessageReceived += P1_MessageReceived;
             p1.MetadataUpdated += P1_MetadataUpdated;
             _p1 = p1;
