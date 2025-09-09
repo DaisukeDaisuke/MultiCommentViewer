@@ -61,7 +61,6 @@ namespace ryu_s.BrowserCookie
                 {
                     result.Add(cookie);
                 }
-                Debug.WriteLine(cookie.Domain);
             }
             return result;
         }
