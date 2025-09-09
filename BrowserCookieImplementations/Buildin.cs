@@ -57,11 +57,11 @@ namespace ryu_s.BrowserCookie
 
             foreach (var cookie in allLocalCaches) {
                 // セッションクッキーの判定
-                if (cookie.Expires == DateTime.MinValue)
-                {
-                    // セッションクッキー
-                    continue;
-                }
+                //if (cookie.Expires == DateTime.MinValue)
+                //{
+                //    // セッションクッキー
+                //    continue;
+                //}
                 // 有効期限付きクッキー
                 if (cookie.Expired)
                 {
