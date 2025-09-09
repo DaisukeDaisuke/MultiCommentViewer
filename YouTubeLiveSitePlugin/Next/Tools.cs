@@ -820,7 +820,7 @@ namespace YouTubeLiveSitePlugin.Next
             //++onBehalfOfUser
             //continuation
 
-            var url = $"https://www.youtube.com/youtubei/v1/live_chat/get_live_chat?key={innerTubeApiKey}";
+            var url = $"https://www.youtube.com/youtubei/v1/live_chat/get_live_chat?key={innerTubeApiKey}&prettyPrint=false";
             var handler = new HttpClientHandler
             {
                 UseCookies = true,
