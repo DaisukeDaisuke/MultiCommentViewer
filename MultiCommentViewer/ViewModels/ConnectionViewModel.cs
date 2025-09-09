@@ -360,6 +360,7 @@ namespace MultiCommentViewer
             {
                 //接続中は削除できないように選択を外す
                 IsSelected = false;
+                CanLogin = false;
                 var input = Input;
                 var browser = SelectedBrowser.Browser;
                 await _commentProvider.ConnectAsync(input, browser);
@@ -377,6 +378,7 @@ namespace MultiCommentViewer
             try
             {
                 _commentProvider.Disconnect();
+                CanLogin = IsLoginEnabled(this.SelectedSite);
             }
             catch (Exception ex)
             {
@@ -488,6 +490,8 @@ namespace MultiCommentViewer
                 {
                     MessageBox.Show("ログインデーターの取得が完了しました。ブラウザを「buildin(default)」にして、コメビュを再起動してください", "情報",
                         MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    UpdateLoggedInInfo();
                 }
                 else if (!string.IsNullOrEmpty(result.ErrorMessage))
                 {
