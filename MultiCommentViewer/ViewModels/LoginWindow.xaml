@@ -10,7 +10,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Margin="10"><Run Text="ログインしてください。完了したら「完了」ボタンを押してください。"/><Run Language="ja-jp" Text="既にログイン済みの場合そのまま完了を押してください"/></TextBlock>
+        <TextBlock Grid.Row="0" Margin="10"><Run Text="ログインしてください。完了したら「完了」ボタンを押してください。"/><Run Language="ja-jp" Text="既にログイン済みの場合はそのまま完了を押してください"/></TextBlock>
 
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
             <Button Content="完了" Click="CompleteButton_Click" Width="80" Height="30" Margin="5"/>
