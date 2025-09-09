@@ -129,7 +129,6 @@ namespace MultiCommentViewer
 
         private bool IsLoginEnabled(SiteViewModel connectionName)
         {
-            Debug.WriteLine(connectionName.DisplayName);
             var site = GetLoginUrlForSite(connectionName.DisplayName);
             return !string.IsNullOrEmpty(site);
         }
@@ -512,7 +511,6 @@ namespace MultiCommentViewer
         // サイト別のログインURL取得
         private string GetLoginUrlForSite(string site)
         {
-            Debug.WriteLine(site);
             return site switch
             {
                 "Mirrativ" => "www.mirrativ.com", // Mirrativ.bin

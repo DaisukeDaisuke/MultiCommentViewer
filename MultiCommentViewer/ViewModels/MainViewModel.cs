@@ -130,8 +130,6 @@ namespace MultiCommentViewer
         public ICommand CommentCopyCommand { get; }
         public ICommand OpenUrlCommand { get; }
 
-
-
         #endregion //Commands
 
         #region Fields
@@ -1405,13 +1403,6 @@ namespace MultiCommentViewer
             SetSystemInfo("open: " + url, InfoType.Debug);
         }
 
-        // クッキー保存メソッド
-        private void SaveCookiesForSite(string siteName, string cookies)
-        {
-            // 設定ファイルやデータベースに保存
-            // 例: Properties.Settings.Default[$"{siteName}_Cookies"] = cookies;
-        }
-
         private void CopyComment()
         {
             // 本当はこのModel (this) が CommentDataGridViewModelBase を継承しているのでこんなのは不要だが
@@ -1784,8 +1775,6 @@ namespace MultiCommentViewer
             LoadedCommand = new RelayCommand(Loaded);
             CommentCopyCommand = new RelayCommand(CopyComment);
             OpenUrlCommand = new RelayCommand(OpenUrl);
-            
-
 
             _options.PropertyChanged += (s, e) =>
             {
