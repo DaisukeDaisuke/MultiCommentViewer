@@ -56,6 +56,19 @@ namespace ryu_s.BrowserCookie
             var result = new List<Cookie>();
 
             foreach (var cookie in allLocalCaches) {
+                // セッションクッキーの判定
+                if (cookie.Expires == DateTime.MinValue)
+                {
+                    // セッションクッキー
+                    continue;
+                }
+                // 有効期限付きクッキー
+                if (cookie.Expired)
+                {
+                    // 期限切れ
+                    continue;
+                }
+               
                 // ドメインマッチングロジック
                 if (IsHostMatch(cookie.Domain, domain))
                 {
