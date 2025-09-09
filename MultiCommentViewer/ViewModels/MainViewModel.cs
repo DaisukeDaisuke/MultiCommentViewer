@@ -1,31 +1,25 @@
-﻿using CommentViewerCommon;
-using Common;
-using GalaSoft.MvvmLight.Command;
-using MixchSitePlugin;
-using MultiCommentViewer.Test;
-using MultiCommentViewer.ViewModels;
-using NicoSitePlugin;
-using Plugin;
-using SitePlugin;
-using SitePluginCommon;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
+using GalaSoft.MvvmLight.Command;
+using System.Windows.Input;
+using SitePlugin;
+using System.Collections.ObjectModel;
+using Plugin;
+using System.Diagnostics;
+using System.Windows.Threading;
+using System.Windows.Media;
+using System.ComponentModel;
+using MultiCommentViewer.Test;
+using Common;
+using System.Windows.Data;
+using System.Text.RegularExpressions;
+using CommentViewerCommon;
+using SitePluginCommon;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Threading;
-
+using NicoSitePlugin;
 namespace MultiCommentViewer
 {
     class ColorPair
@@ -1402,7 +1396,6 @@ namespace MultiCommentViewer
             Process.Start(url);
             SetSystemInfo("open: " + url, InfoType.Debug);
         }
-
         private void CopyComment()
         {
             // 本当はこのModel (this) が CommentDataGridViewModelBase を継承しているのでこんなのは不要だが
