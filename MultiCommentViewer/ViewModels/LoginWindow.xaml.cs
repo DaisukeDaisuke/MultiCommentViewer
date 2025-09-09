@@ -119,6 +119,8 @@ namespace MultiCommentViewer.ViewModels
             {
                 var headers = e.Request.Headers;
 
+                //https://browserleaks.com/client-hints
+
                 // User-Agent関連のヘッダーを設定
                 if (headers.Contains("user-agent"))
                 {
@@ -151,11 +153,6 @@ namespace MultiCommentViewer.ViewModels
                 if (headers.Contains("Sec-CH-UA-Platform-Version"))
                 {
                     headers.SetHeader("Sec-CH-UA-Platform-Version", "\"15.0.0\"");
-                }
-
-                if (headers.Contains("uaFullVersion"))
-                {
-                    headers.SetHeader("uaFullVersion", "\"139.0.3405.125\"");
                 }
             };
 
