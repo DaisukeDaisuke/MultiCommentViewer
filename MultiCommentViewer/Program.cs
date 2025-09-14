@@ -87,7 +87,6 @@ namespace MultiCommentViewer
             }
             try
             {
-                SendErrorFile();
             }
             catch { }
             ISitePluginLoader sitePluginLoader = new Test.SitePluginLoaderTest();
@@ -113,8 +112,6 @@ namespace MultiCommentViewer
                 }
                 try
                 {
-                    var s = _logger.GetExceptions();
-                    SendErrorReport(s, GetTitle(), GetVersion());
                 }
                 catch (Exception ex)
                 {
@@ -165,63 +162,6 @@ namespace MultiCommentViewer
                 }
             }
             catch { }
-        }
-        private string GetTitle()
-        {
-            var asm = System.Reflection.Assembly.GetExecutingAssembly();
-            var title = asm.GetName().Name;
-            return title;
-        }
-        private string GetVersion()
-        {
-            var asm = System.Reflection.Assembly.GetExecutingAssembly();
-            var ver = asm.GetName().Version;
-            var s = $"v{ver.Major}.{ver.Minor}.{ver.Build}";
-            return s;
-        }
-        /// <summary>
-        /// エラー情報をサーバに送信する
-        /// </summary>
-        /// <param name="errorData"></param>
-        /// <param name="title"></param>
-        /// <param name="version"></param>
-        private void SendErrorReport(string errorData, string title, string version)
-        {
-            if (string.IsNullOrEmpty(errorData))
-            {
-                return;
-            }
-            var fileStreamContent = new StreamContent(new System.IO.MemoryStream(Encoding.UTF8.GetBytes(errorData)));
-            using (var client = new HttpClient())
-            using (var formData = new MultipartFormDataContent())
-            {
-                client.DefaultRequestHeaders.Add("User-Agent", $"{title} {version}");
-                formData.Add(fileStreamContent, "error", title + "_" + version + "_" + "error.txt");
-                var t = client.PostAsync("https://int-main.net/upload", formData);
-                var response = t.Result;
-                if (!response.IsSuccessStatusCode)
-                {
-                }
-                else
-                {
-                }
-            }
-        }
-        /// <summary>
-        /// error.txtがあったらサーバに送信して削除する
-        /// </summary>
-        private void SendErrorFile()
-        {
-            if (System.IO.File.Exists("error.txt"))
-            {
-                string errorContent;
-                using (var sr = new System.IO.StreamReader("error.txt"))
-                {
-                    errorContent = sr.ReadToEnd();
-                }
-                SendErrorReport(errorContent, GetTitle(), GetVersion());
-                System.IO.File.Delete("error.txt");
-            }
         }
     }
 }
