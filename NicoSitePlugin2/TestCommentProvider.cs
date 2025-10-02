@@ -1338,7 +1338,7 @@ namespace NicoSitePlugin
         {
             if (number == null||number == 0)
             {
-                return "0.0%";
+                return "0.00%";
             }
 
             // パーセント計算
