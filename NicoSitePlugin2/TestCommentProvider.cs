@@ -1084,6 +1084,27 @@ namespace NicoSitePlugin
                 var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
                 RaiseMessageReceived(context);
             }
+            if (message.Message?.SimpleNotification?.Quote != null && message.Message?.SimpleNotification?.Quote != "")
+            {
+                var contents = message.Message.SimpleNotification.Quote;
+                var date = Now();
+                if (message.Meta?.At != null)
+                {
+                    date = fixDateTimeJP(message.Meta.At.ToDateTime());
+                }
+                var comment = new NicoInfo(contents)
+                {
+                    Text = contents,
+                    PostedAt = date
+                };
+                var metadata = new InfoMessageMetadata(comment, _options, _siteOptions)
+                {
+                    IsInitialComment = isInitialCommentsReceiving,
+                    SiteContextGuid = SiteContextGuid,
+                };
+                var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
+                RaiseMessageReceived(context);
+            }
             if (message.Message?.Nicoad != null)
             {
                 var adv1 = message.Message.Nicoad.V1;
