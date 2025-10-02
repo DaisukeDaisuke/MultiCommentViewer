@@ -1,25 +1,22 @@
 ﻿using Common;
+using Dwango.Nicolive.Chat.Service.Edge;
+using Newtonsoft.Json;
+using NicoSitePlugin.Metadata;
+using NicoSitePlugin2.Client;
 using ryu_s.BrowserCookie;
 using SitePlugin;
 using SitePluginCommon;
 using System;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Net;
 using System.Collections.Concurrent;
-using System.Threading;
-using Newtonsoft.Json;
-using NicoSitePlugin.Metadata;
-using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 using System.Diagnostics;
-using NicoSitePlugin2.Client;
-using Dwango.Nicolive.Chat.Service.Edge;
 using System.Linq;
-using System.Web.UI.WebControls;
+using System.Net;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using static Dwango.Nicolive.Chat.Data.Atoms.SimpleNotificationV2.Types;
 using static Dwango.Nicolive.Chat.Data.Enquete.Types;
-using System.Text;
-using System.Security.Policy;
 
 namespace NicoSitePlugin
 {
@@ -865,13 +862,13 @@ namespace NicoSitePlugin
                 }
             }
 
-            if (message.Message?.SimpleNotification != null)
+            if (message.Message?.SimpleNotificationV2 != null)
             {
-                var notification = message.Message?.SimpleNotification;
+                var notification = message.Message?.SimpleNotificationV2;
                 //info
-                if (notification.ProgramExtended != null && notification.ProgramExtended != "")
+                if (notification.Type == NotificationType.ProgramExtended)
                 {
-                    var contents = notification.ProgramExtended;
+                    var contents = notification.Message;
 
                     var date = Now();
                     if (message.Meta?.At != null)
@@ -892,9 +889,9 @@ namespace NicoSitePlugin
                     var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
                     RaiseMessageReceived(context);
                 }
-                else if (notification.Ichiba != null && notification.Ichiba != "")
+                else if (notification.Type == NotificationType.Ichiba)
                 {
-                    var Ichiba = "【放送ネタ】" + notification.Ichiba;
+                    var Ichiba = notification.Message;
 
                     var date = Now();
                     if (message.Meta?.At != null)
@@ -915,9 +912,9 @@ namespace NicoSitePlugin
                     var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
                     RaiseMessageReceived(context);
                 }
-                else if (notification.RankingIn != null && notification.RankingIn != "")
+                else if (notification.Type == NotificationType.RankingIn)
                 {
-                    var contents = notification.RankingIn;
+                    var contents = notification.Message;
 
                     var date = Now();
                     if (message.Meta?.At != null)
@@ -937,9 +934,9 @@ namespace NicoSitePlugin
                     var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
                     RaiseMessageReceived(context);
                 }
-                else if (notification.Visited != null && notification.Visited != "")
+                else if (notification.Type == NotificationType.Visited)
                 {
-                    var contents = notification.Visited;
+                    var contents = notification.Message;
                     var date = Now();
                     if (message.Meta?.At != null)
                     {
@@ -958,9 +955,9 @@ namespace NicoSitePlugin
                     var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
                     RaiseMessageReceived(context);
                 }
-                else if (notification.Quote != null&&notification.Quote != "")
+                else if (notification.Type == NotificationType.Cruise)
                 {
-                    var contents = notification.Quote;
+                    var contents = notification.Message;
                     var date = Now();
                     if (message.Meta?.At != null)
                     {
@@ -979,7 +976,7 @@ namespace NicoSitePlugin
                     var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
                     RaiseMessageReceived(context);
                 }
-                else if (notification.Emotion != null&&notification.Emotion != "")
+                else if (notification.Type == NotificationType.Emotion)
                 {
                     if (!isInitialCommentsReceiving)
                     {
@@ -988,7 +985,7 @@ namespace NicoSitePlugin
                         {
                             date = fixDateTimeJP(message.Meta.At.ToDateTime());
                         }
-                        var content = notification.Emotion;
+                        var content = notification.Message;
                         var abc = new NicoEmotion(content)
                         {
                             PostedAt = date,
@@ -1004,9 +1001,30 @@ namespace NicoSitePlugin
                         RaiseMessageReceived(context);
                     }
                 }
-                else if (notification.Cruise != null && notification.Cruise != "")
+                else if (notification.Type != NotificationType.SupporterRegistered)
                 {
-                    var contents = notification.Cruise;
+                    var contents = notification.Message;
+                    var date = Now();
+                    if (message.Meta?.At != null)
+                    {
+                        date = fixDateTimeJP(message.Meta.At.ToDateTime());
+                    }
+                    var comment = new NicoInfo(contents)
+                    {
+                        Text = contents,
+                        PostedAt = date
+                    };
+                    var metadata = new InfoMessageMetadata(comment, _options, _siteOptions)
+                    {
+                        IsInitialComment = isInitialCommentsReceiving,
+                        SiteContextGuid = SiteContextGuid,
+                    };
+                    var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
+                    RaiseMessageReceived(context);
+                }
+                else if (notification.Type != NotificationType.UserLevelUp)
+                {
+                    var contents = notification.Message;
                     var date = Now();
                     if (message.Meta?.At != null)
                     {
@@ -1098,7 +1116,7 @@ namespace NicoSitePlugin
             }
             if(message.State != null)
             {
-                var announce = message.State?.Marque?.Display?.OperatorComment; //放送者コメント
+                var announce = message.State?.Marquee?.Display?.OperatorComment; //放送者コメント
                 if(announce != null)
                 {
                     var contents = announce.Content;
@@ -1327,7 +1345,7 @@ namespace NicoSitePlugin
             double percentage = ((double)number / 1000) * 100;
 
             // 結果を小数点以下1桁でフォーマット
-            return $"{percentage:F1}%";
+            return $"{percentage:F2}%";
         }
 
         public DateTime Now()

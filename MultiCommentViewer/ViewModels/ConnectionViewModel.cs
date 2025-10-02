@@ -476,27 +476,27 @@ namespace MultiCommentViewer
                     CanLogin = false;
                 });
 
-                var loginWindow = new LoginWindow(site, loginUrl);
-                loginWindow.Owner = Application.Current.MainWindow;
+                //var loginWindow = new LoginWindow(site, loginUrl);
+                //loginWindow.Owner = Application.Current.MainWindow;
 
                 // ShowDialog() の代わりに Show() を使用
-                loginWindow.Show();
+                //loginWindow.Show();
 
                 // 非同期でログイン完了を待つ
-                var result = await loginWindow.WaitForCompletionAsync();
+                //var result = await loginWindow.WaitForCompletionAsync();
 
-                if (result.IsCompleted)
-                {
-                    MessageBox.Show("ログインデーターの取得が完了しました。ブラウザを「buildin(default)」にして、コメビュを再起動してください", "情報",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                //if (result.IsCompleted)
+                //{
+                //    MessageBox.Show("ログインデーターの取得が完了しました。ブラウザを「buildin(default)」にして、コメビュを再起動してください", "情報",
+                //        MessageBoxButton.OK, MessageBoxImage.Information);
 
-                    UpdateLoggedInInfo();
-                }
-                else if (!string.IsNullOrEmpty(result.ErrorMessage))
-                {
-                    MessageBox.Show($"ログインエラー: {result.ErrorMessage}", "エラー",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                //    UpdateLoggedInInfo();
+                //}
+                //else if (!string.IsNullOrEmpty(result.ErrorMessage))
+                //{
+                //    MessageBox.Show($"ログインエラー: {result.ErrorMessage}", "エラー",
+                //        MessageBoxButton.OK, MessageBoxImage.Error);
+                //}
             }
             catch (Exception ex)
             {

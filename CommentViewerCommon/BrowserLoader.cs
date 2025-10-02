@@ -23,7 +23,7 @@ namespace CommentViewerCommon
                 new EdgeManager(),
                 new OperaManager(),
                 new OperaGxManager(),
-                new BuildinManager(),
+                //new BuildinManager(),
             };
             foreach (var manager in managers)
             {
