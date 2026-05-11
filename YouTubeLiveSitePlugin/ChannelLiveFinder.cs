@@ -50,26 +50,11 @@ namespace YouTubeLiveSitePlugin
                                 if (badge.ContainsKey("thumbnailBadgeViewModel"))
                                 {
                                     var badgeStyle = (string)badge.thumbnailBadgeViewModel.badgeStyle;
-                                    // 変更2: badgeStyleで判定することでLIVE/ライブ両方に対応
                                     if (badgeStyle == "THUMBNAIL_OVERLAY_BADGE_STYLE_LIVE")
                                     {
                                         isLive = true;
-                                    }
-                                }
-                            }
-                        }
-                        if (overlay.ContainsKey("thumbnailHoverOverlayToggleActionsViewModel"))
-                        {
-                            var buttons = overlay.thumbnailHoverOverlayToggleActionsViewModel.buttons;
-                            foreach (var button in buttons)
-                            {
-                                if (button.ContainsKey("toggleButtonViewModel"))
-                                {
-                                    var watchEndpoint = button.toggleButtonViewModel.defaultButtonViewModel.buttonViewModel.onTap.innertubeCommand.watchEndpoint;
-                                    if (watchEndpoint != null)
-                                    {
-                                        videoId = (string)watchEndpoint.videoId;
-                                        break;
+                                        // animationActivationTargetIdがvideoIdそのもの
+                                        videoId = (string)badge.thumbnailBadgeViewModel.animationActivationTargetId;
                                     }
                                 }
                             }
