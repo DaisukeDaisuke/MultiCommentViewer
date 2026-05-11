@@ -410,7 +410,7 @@ namespace YouTubeLiveSitePlugin.Next
         }
         private async Task ProcessAction(List<IAction> actions, int timeoutMs, bool logined)
         {
-            var timeoutMs_ = Math.Max(timeoutMs, 1000);//非ログインだとコメント取得そのまま
+            var timeoutMs_ = Math.Min(timeoutMs, 2000);//非ログインだとコメント取得そのまま
             if (logined)
             {
                 timeoutMs_ = Math.Min(timeoutMs, 1500);//絶対10秒だけど、無視する
