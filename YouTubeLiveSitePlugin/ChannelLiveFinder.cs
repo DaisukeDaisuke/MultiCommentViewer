@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using System.Net;
 using System;
 using System.Collections.Generic;
@@ -28,11 +28,67 @@ namespace YouTubeLiveSitePlugin
                     //一番最後の項目はcontinuationItemRendererになっていた。更に表示する用かと。
                     continue;
                 }
-                var videoId = (string)content.richItemRenderer.content.videoRenderer.videoId;
-                var thumbnailText = (string)(GetText(content.richItemRenderer.content.videoRenderer.thumbnailOverlays[0].thumbnailOverlayTimeStatusRenderer.text) ?? "");
-                if (thumbnailText == "LIVE")
+
+                // 変更1: 新構造(lockupViewModel)と旧構造(videoRenderer)の両方に対応
+                string videoId;
+                bool isLive;
+                var itemContent = content.richItemRenderer.content;
+                if (itemContent.ContainsKey("lockupViewModel"))
                 {
-                    list.Add(videoId);
+                    // 新構造: videoIdはwatchEndpointから取得
+                    var lockup = itemContent.lockupViewModel;
+                    var overlays = lockup.contentImage.thumbnailViewModel.overlays;
+                    isLive = false;
+                    videoId = null;
+                    foreach (var overlay in overlays)
+                    {
+                        if (overlay.ContainsKey("thumbnailBottomOverlayViewModel"))
+                        {
+                            var badges = overlay.thumbnailBottomOverlayViewModel.badges;
+                            foreach (var badge in badges)
+                            {
+                                if (badge.ContainsKey("thumbnailBadgeViewModel"))
+                                {
+                                    var badgeStyle = (string)badge.thumbnailBadgeViewModel.badgeStyle;
+                                    // 変更2: badgeStyleで判定することでLIVE/ライブ両方に対応
+                                    if (badgeStyle == "THUMBNAIL_OVERLAY_BADGE_STYLE_LIVE")
+                                    {
+                                        isLive = true;
+                                    }
+                                }
+                            }
+                        }
+                        if (overlay.ContainsKey("thumbnailHoverOverlayToggleActionsViewModel"))
+                        {
+                            var buttons = overlay.thumbnailHoverOverlayToggleActionsViewModel.buttons;
+                            foreach (var button in buttons)
+                            {
+                                if (button.ContainsKey("toggleButtonViewModel"))
+                                {
+                                    var watchEndpoint = button.toggleButtonViewModel.defaultButtonViewModel.buttonViewModel.onTap.innertubeCommand.watchEndpoint;
+                                    if (watchEndpoint != null)
+                                    {
+                                        videoId = (string)watchEndpoint.videoId;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (isLive && videoId != null)
+                    {
+                        list.Add(videoId);
+                    }
+                }
+                else
+                {
+                    // 旧構造: videoRenderer
+                    videoId = (string)itemContent.videoRenderer.videoId;
+                    var thumbnailText = (string)(GetText(itemContent.videoRenderer.thumbnailOverlays[0].thumbnailOverlayTimeStatusRenderer.text) ?? "");
+                    if (thumbnailText == "LIVE")
+                    {
+                        list.Add(videoId);
+                    }
                 }
             }
             return list;
@@ -77,7 +133,8 @@ namespace YouTubeLiveSitePlugin
                 {
                     throw new Exception();
                 }
-                if (title == "Live" && selected)
+                // 変更3: "ライブ"（日本語）にも対応
+                if ((title == "Live" || title == "ライブ") && selected)
                 {
                     return tab;
                 }
