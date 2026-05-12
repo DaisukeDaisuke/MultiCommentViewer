@@ -2072,25 +2072,11 @@ namespace MultiCommentViewer
         }
         private void ShowDevelopersTwitter()
         {
-            try
-            {
-                System.Diagnostics.Process.Start("https://twitter.com/kv510k");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogException(ex);
-            }
+            
         }
         private void ShowWebSite()
         {
-            try
-            {
-                System.Diagnostics.Process.Start("https://ryu-s.github.io/app/multicommentviewer");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogException(ex);
-            }
+            
         }
         private void Exit()
         {
