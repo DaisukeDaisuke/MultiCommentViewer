@@ -608,45 +608,7 @@ namespace MultiCommentViewer
         }
         private async Task CheckIfUpdateExists(bool isAutoCheck)
         {
-            //新しいバージョンがあるか確認
-            Common.AutoUpdate.LatestVersionInfo latestVersionInfo;
-            string name = AppDirName;
-            try
-            {
-                latestVersionInfo = await Common.AutoUpdate.Tools.GetLatestVersionInfo(name, GetUserAgent());
-            }
-            catch (Exception ex)
-            {
-                _logger.LogException(ex);
-                if (!isAutoCheck)
-                {
-                    SetSystemInfo("サーバに障害が発生している可能性があります。しばらく経ってから再度試してみて下さい。", InfoType.Error);
-                }
-                return;
-            }
-            try
-            {
-                var asm = System.Reflection.Assembly.GetExecutingAssembly();
-                var myVer = asm.GetName().Version;
-                if (myVer < latestVersionInfo.Version)
-                {
-                    //新しいバージョンがあった
-                    MessengerInstance.Send(new Common.AutoUpdate.ShowUpdateDialogMessage(true, myVer, latestVersionInfo, _logger, GetUserAgent()));
-                }
-                else
-                {
-                    //自動チェックの時は、アップデートが無ければ何も表示しない
-                    if (!isAutoCheck)
-                    {
-                        //アップデートはありません
-                        MessengerInstance.Send(new Common.AutoUpdate.ShowUpdateDialogMessage(false, myVer, latestVersionInfo, _logger, GetUserAgent()));
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogException(ex);
-            }
+            
         }
         #endregion //Methods
         public event EventHandler<EventArgs> CloseRequested;
