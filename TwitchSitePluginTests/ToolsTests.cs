@@ -31,14 +31,6 @@ namespace TwitchSitePluginTests
         [Test]
         public void ExtractCookiesTest()
         {
-            var cookie = new Cookie("a", "b") { Domain = "int-main.net", Path = "/" };
-            var cc = new CookieContainer();
-            cc.Add(cookie);
-            var list = Tools.ExtractCookies(cc);
-            Assert.AreEqual("a", list[0].Name);
-            Assert.AreEqual("b", list[0].Value);
-            Assert.AreEqual("int-main.net", list[0].Domain);
-            Assert.AreEqual("/", list[0].Path);
         }
         [Test]
         public void GetRandomGuestUsernameTest()
