@@ -352,12 +352,12 @@ namespace YouTubeLiveSitePlugin.Next
                 else if (continuation is TimedContinuationData timed)
                 {
                     dataToPost.SetContinuation(timed.Continaution);
-                    await ProcessAction(actions, timed.TimeoutMs, ytCfg.IsLoggedIn);
+                    await ProcessAction(actions, timed.TimeoutMs);
                 }
                 else if (continuation is InvalidationContinuationData invalid)
                 {
                     dataToPost.SetContinuation(invalid.Continaution);
-                    await ProcessAction(actions, invalid.TimeoutMs, ytCfg.IsLoggedIn);
+                    await ProcessAction(actions, invalid.TimeoutMs);
                 }
                 else if (continuation is UnknownContinuationData unknown)
                 {
@@ -408,28 +408,23 @@ namespace YouTubeLiveSitePlugin.Next
                 //}
             }
         }
-        private async Task ProcessAction(List<IAction> actions, int timeoutMs, bool logined)
+        private async Task ProcessAction(List<IAction> actions, int timeoutMs)
         {
-            var timeoutMs_ = Math.Min(timeoutMs, 10000);//非ログインだとコメント取得そのまま
-            if (logined)
-            {
-                timeoutMs_ = Math.Min(timeoutMs, 1500);//絶対10秒だけど、無視する
-            }
+            var timeoutMs_ = Math.Max(timeoutMs, 1000);
             if (actions.Count > 0)
             {
-
-                foreach(var action in actions)
+                var waitTime = timeoutMs_ / actions.Count;
+                foreach (var action in actions)
                 {
                     ProcessAction(action);
-                }
-                var waitTime = timeoutMs_;
-                try
-                {
-                    await Task.Delay(waitTime, _cts.Token);
-                }
-                catch (TaskCanceledException)
-                {
-                    return;
+                    try
+                    {
+                        await Task.Delay(waitTime, _cts.Token);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        return;
+                    }
                 }
             }
             else
