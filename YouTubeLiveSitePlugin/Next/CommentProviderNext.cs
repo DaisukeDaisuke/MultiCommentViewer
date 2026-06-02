@@ -413,18 +413,18 @@ namespace YouTubeLiveSitePlugin.Next
             var timeoutMs_ = Math.Max(timeoutMs, 1000);
             if (actions.Count > 0)
             {
-                var waitTime = timeoutMs_ / actions.Count;
                 foreach (var action in actions)
                 {
                     ProcessAction(action);
-                    try
-                    {
-                        await Task.Delay(waitTime, _cts.Token);
-                    }
-                    catch (TaskCanceledException)
-                    {
-                        return;
-                    }
+                }
+                var waitTime = timeoutMs_;
+                try
+                {
+                    await Task.Delay(waitTime, _cts.Token);
+                }
+                catch (TaskCanceledException)
+                {
+                    return;
                 }
             }
             else
