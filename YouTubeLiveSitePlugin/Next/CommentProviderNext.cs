@@ -352,12 +352,12 @@ namespace YouTubeLiveSitePlugin.Next
                 else if (continuation is TimedContinuationData timed)
                 {
                     dataToPost.SetContinuation(timed.Continaution);
-                    await ProcessAction(actions, timed.TimeoutMs);
+                    await ProcessAction(actions, timed.TimeoutMs, ytCfg.IsLoggedIn);
                 }
                 else if (continuation is InvalidationContinuationData invalid)
                 {
                     dataToPost.SetContinuation(invalid.Continaution);
-                    await ProcessAction(actions, invalid.TimeoutMs);
+                    await ProcessAction(actions, invalid.TimeoutMs, ytCfg.IsLoggedIn);
                 }
                 else if (continuation is UnknownContinuationData unknown)
                 {
@@ -408,11 +408,16 @@ namespace YouTubeLiveSitePlugin.Next
                 //}
             }
         }
-        private async Task ProcessAction(List<IAction> actions, int timeoutMs)
+        private async Task ProcessAction(List<IAction> actions, int timeoutMs, bool logined)
         {
-            var timeoutMs_ = Math.Max(timeoutMs, 1000);
+            var timeoutMs_ = Math.Min(timeoutMs, 2000);//非ログインだとコメント取得そのまま
+            if (logined)
+            {
+                timeoutMs_ = Math.Min(timeoutMs, 1500);//絶対10秒だけど、無視する
+            }
             if (actions.Count > 0)
             {
+
                 foreach (var action in actions)
                 {
                     ProcessAction(action);
@@ -683,7 +688,7 @@ namespace YouTubeLiveSitePlugin.Next
             metaProvider.InfoReceived += MetaProvider_InfoReceived;
             metaProvider.MetadataReceived += MetaProvider_MetadataReceived;
 
-reload:
+        reload:
             var reason = ReasonForDisconnection.Unknown;
             try
             {
