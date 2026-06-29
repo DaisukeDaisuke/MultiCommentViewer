@@ -78,7 +78,11 @@ namespace MultiCommentViewer
                 var before = _commentProvider;
                 if (before != null)
                 {
-                    Debug.Assert(before.CanConnect, "接続中に変更はできない");
+                    if (!before.CanConnect)
+                    {
+                        RaisePropertyChanged();
+                        return;
+                    }
                     before.CanConnectChanged -= CommentProvider_CanConnectChanged;
                     before.CanDisconnectChanged -= CommentProvider_CanDisconnectChanged;
                     before.MessageReceived -= CommentProvider_MessageReceived;
