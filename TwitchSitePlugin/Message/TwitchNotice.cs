@@ -7,6 +7,7 @@ namespace TwitchSitePlugin
         public override SiteType SiteType { get; } = SiteType.Twitch;
         public TwitchMessageType TwitchMessageType { get; } = TwitchMessageType.Notice;
         public string Message { get; set; }
+        public bool IsSubscription { get; set; }
 
         public TwitchNotice(string raw) : base(raw)
         {

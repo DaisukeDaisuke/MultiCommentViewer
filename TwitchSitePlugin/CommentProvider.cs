@@ -273,6 +273,7 @@ namespace TwitchSitePlugin
                         break;
                     case "USERNOTICE":
                         //"@badge-info=subscriber/11;badges=subscriber/6,bits/100;color=#FF00FF;display-name=Kosnes;emotes=205480:0-10;flags=;id=b0dbd1a7-86fe-4f54-9d4b-1cdd47a49628;login=kosnes;mod=0;msg-id=resub;msg-param-cumulative-months=11;msg-param-months=0;msg-param-should-share-streak=1;msg-param-streak-months=11;msg-param-sub-plan-name=Channel\\sSubscription\\s(meclipse);msg-param-sub-plan=Prime;room-id=37402112;subscriber=1;system-msg=Kosnes\\ssubscribed\\swith\\sTwitch\\sPrime.\\sThey've\\ssubscribed\\sfor\\s11\\smonths,\\scurrently\\son\\sa\\s11\\smonth\\sstreak!;tmi-sent-ts=1567069704460;user-id=42814323;user-type= :tmi.twitch.tv USERNOTICE #shroud :shroud4Head"
+                        OnUserNoticeReceived(result);
                         break;
                     case "ROOMSTATE":
                         //"@emote-only=0;followers-only=10;r9k=0;rituals=0;room-id=37402112;slow=5;subs-only=0 :tmi.twitch.tv ROOMSTATE #shroud"
@@ -368,7 +369,38 @@ namespace TwitchSitePlugin
         }
         private void OnNoticeReceived(Result result)
         {
-            var message = result.Params[1];
+            var message = GetParam(result, 1);
+            var notice = new TwitchNotice(result.Raw)
+            {
+                Message = message,
+                IsSubscription = true,
+            };
+            var metadata = new MessageMetadata(notice, _options, _siteOptions, null, this, false)
+            {
+                IsInitialComment = false,
+                SiteContextGuid = SiteContextGuid,
+            };
+            var methods = new TwitchMessageMethods();
+            var messageContext = new TwitchMessageContext(notice, metadata, methods);
+            MessageReceived?.Invoke(this, messageContext);
+        }
+
+        private void OnUserNoticeReceived(Result result)
+        {
+            if (IsIgnoredUserNotice(result))
+                return;
+
+            var systemMessage = GetTag(result, "system-msg");
+            var userMessage = GetParam(result, 1);
+            var message = string.IsNullOrEmpty(systemMessage)
+                ? userMessage
+                : string.IsNullOrEmpty(userMessage)
+                    ? systemMessage
+                    : $"{systemMessage} {userMessage}";
+
+            if (string.IsNullOrEmpty(message))
+                return;
+
             var notice = new TwitchNotice(result.Raw)
             {
                 Message = message,
@@ -381,6 +413,23 @@ namespace TwitchSitePlugin
             var methods = new TwitchMessageMethods();
             var messageContext = new TwitchMessageContext(notice, metadata, methods);
             MessageReceived?.Invoke(this, messageContext);
+        }
+
+        private static bool IsIgnoredUserNotice(Result result)
+        {
+            return string.Equals(GetTag(result, "msg-id"), "viewermilestone", StringComparison.OrdinalIgnoreCase)
+                && string.Equals(GetTag(result, "msg-param-category"), "watch-streak", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string GetTag(Result result, string key)
+        {
+            string value;
+            return result.Tags.TryGetValue(key, out value) ? value : "";
+        }
+
+        private static string GetParam(Result result, int index)
+        {
+            return result.Params.Count > index ? result.Params[index] : "";
         }
 
         protected virtual string GetRandomGuestUsername()

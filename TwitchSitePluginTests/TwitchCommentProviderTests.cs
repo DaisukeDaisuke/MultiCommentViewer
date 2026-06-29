@@ -177,6 +177,109 @@ namespace TwitchSitePluginTests
             return;
         }
         [Test]
+        public async Task UserNoticeのサブスク通知をNoticeとして受信する()
+        {
+            var data = TestHelper.GetSampleData("Streams.txt");
+            var raw = "@badge-info=subscriber/37;badges=subscriber/12;color=#D2691E;DISPLAY-NAME=Electrikam;emotes=;flags=;id=a8b3f611-f871-4ced-8fbe-f96895508f8d;login=electrikam;mod=0;MSG-ID=resub;msg-param-cumulative-months=37;msg-param-months=0;msg-param-multimonth-duration=1;msg-param-multimonth-tenure=0;msg-param-should-share-streak=0;msg-param-sub-plan-name=Channel\\sSubscription\\s(aurateur);msg-param-sub-plan=Prime;msg-param-was-gifted=false;room-id=107536229;subscriber=1;system-msg=Electrikam\\ssubscribed\\swith\\sPrime.\\sThey've\\ssubscribed\\sfor\\s37\\smonths!;tmi-sent-ts=1782712095262;user-id=35868321;user-type=;vip=0 :tmi.twitch.tv usernotice #aurateur :ありがとう";
+            var serverMock = new Mock<IDataServer>();
+            serverMock.Setup(s => s.GetAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, string>>())).Returns(Task.FromResult(data));
+            var loggerMock = new Mock<ILogger>();
+            var optionsMock = new Mock<ICommentOptions>();
+            var siteOptions = new TwitchSiteOptions
+            {
+                NeedAutoSubNickname = true
+            };
+            var userStoreMock = new Mock<IUserStoreManager>();
+            var browserProfileMock = new Mock<IBrowserProfile>();
+            var messageProvider = new MessageProvider();
+            var commentProvider = new C(serverMock.Object, loggerMock.Object, optionsMock.Object, siteOptions, userStoreMock.Object)
+            {
+                MessageProvider = messageProvider,
+                MetadataProvider = new MetadataProvider(),
+            };
+            IMessageContext actual = null;
+            commentProvider.MessageReceived += (s, e) =>
+            {
+                actual = e;
+                commentProvider.Disconnect();
+            };
+            var t = commentProvider.ConnectAsync("", browserProfileMock.Object);
+            messageProvider.SetResult(raw);
+            await t;
+            var notice = actual.Message as ITwitchNotice;
+            Assert.AreEqual(TwitchMessageType.Notice, notice.TwitchMessageType);
+            Assert.AreEqual("Electrikam subscribed with Prime. They've subscribed for 37 months! ありがとう", notice.Message);
+            return;
+        }
+        [Test]
+        public async Task UserNoticeのレイド通知をNoticeとして受信する()
+        {
+            var data = TestHelper.GetSampleData("Streams.txt");
+            var raw = "@badge-info=;badges=;color=#8A2BE2;display-name=Raider;emotes=;flags=;id=11111111-2222-3333-4444-555555555555;login=raider;mod=0;msg-id=raid;msg-param-displayName=Raider;msg-param-login=raider;msg-param-profileImageURL=;msg-param-viewerCount=123;room-id=107536229;subscriber=0;system-msg=123\\sraiders\\sfrom\\sRaider\\shave\\sjoined!;tmi-sent-ts=1782712095262;user-id=35868321;user-type=;vip=0 :tmi.twitch.tv USERNOTICE #aurateur";
+            var serverMock = new Mock<IDataServer>();
+            serverMock.Setup(s => s.GetAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, string>>())).Returns(Task.FromResult(data));
+            var loggerMock = new Mock<ILogger>();
+            var optionsMock = new Mock<ICommentOptions>();
+            var siteOptions = new TwitchSiteOptions
+            {
+                NeedAutoSubNickname = true
+            };
+            var userStoreMock = new Mock<IUserStoreManager>();
+            var browserProfileMock = new Mock<IBrowserProfile>();
+            var messageProvider = new MessageProvider();
+            var commentProvider = new C(serverMock.Object, loggerMock.Object, optionsMock.Object, siteOptions, userStoreMock.Object)
+            {
+                MessageProvider = messageProvider,
+                MetadataProvider = new MetadataProvider(),
+            };
+            IMessageContext actual = null;
+            commentProvider.MessageReceived += (s, e) =>
+            {
+                actual = e;
+                commentProvider.Disconnect();
+            };
+            var t = commentProvider.ConnectAsync("", browserProfileMock.Object);
+            messageProvider.SetResult(raw);
+            await t;
+            var notice = actual.Message as ITwitchNotice;
+            Assert.AreEqual(TwitchMessageType.Notice, notice.TwitchMessageType);
+            Assert.AreEqual("123 raiders from Raider have joined!", notice.Message);
+            return;
+        }
+        [Test]
+        public async Task UserNoticeの連続視聴記録は無視する()
+        {
+            var data = TestHelper.GetSampleData("Streams.txt");
+            var raw = "@badge-info=subscriber/20;badges=subscriber/18,premium/1;color=;display-name=antiguovecino;emotes=;flags=;id=f468eac5-5040-4f68-88d8-527af08a0746;login=antiguovecino;mod=0;msg-id=viewermilestone;msg-param-category=watch-streak;msg-param-copoReward=450;msg-param-id=639db72e-b9a4-48e4-9599-beae8f65d407;msg-param-value=425;room-id=1140571796;subscriber=1;system-msg=antiguovecino\\swatched\\s425\\sconsecutive\\sstreams\\sand\\ssparked\\sa\\swatch\\sstreak!;tmi-sent-ts=1782716609954;user-id=1114650305;user-type=;vip=0 :tmi.twitch.tv USERNOTICE #lapizarradeandres";
+            var serverMock = new Mock<IDataServer>();
+            serverMock.Setup(s => s.GetAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, string>>())).Returns(Task.FromResult(data));
+            var loggerMock = new Mock<ILogger>();
+            var optionsMock = new Mock<ICommentOptions>();
+            var siteOptions = new TwitchSiteOptions
+            {
+                NeedAutoSubNickname = true
+            };
+            var userStoreMock = new Mock<IUserStoreManager>();
+            var browserProfileMock = new Mock<IBrowserProfile>();
+            var messageProvider = new MessageProvider();
+            var commentProvider = new C(serverMock.Object, loggerMock.Object, optionsMock.Object, siteOptions, userStoreMock.Object)
+            {
+                MessageProvider = messageProvider,
+                MetadataProvider = new MetadataProvider(),
+            };
+            var received = false;
+            commentProvider.MessageReceived += (s, e) =>
+            {
+                received = true;
+            };
+            var t = commentProvider.ConnectAsync("", browserProfileMock.Object);
+            messageProvider.SetResult(raw);
+            commentProvider.Disconnect();
+            await t;
+            Assert.IsFalse(received);
+            return;
+        }
+        [Test]
         public async Task GetCurrentUserInfoTest()
         {
             var serverMock = new Mock<IDataServer>();
