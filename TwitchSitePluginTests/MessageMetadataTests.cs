@@ -69,6 +69,25 @@ namespace TwitchSitePluginTests
             Assert.IsTrue(foreColorRaised);
         }
         [Test]
+        public void NoticeColorTest()
+        {
+            var message = new TwitchNotice("")
+            {
+                IsSubscription = false
+            };
+            var optionsMock = new Mock<ICommentOptions>();
+            var siteOptionsMock = new Mock<ITwitchSiteOptions>();
+            siteOptionsMock.Setup(o => o.NoticeBackColor).Returns(Colors.Yellow);
+            siteOptionsMock.Setup(o => o.NoticeForeColor).Returns(Colors.Black);
+            siteOptionsMock.Setup(o => o.SubscriptionNoticeBackColor).Returns(Colors.Purple);
+            siteOptionsMock.Setup(o => o.SubscriptionNoticeForeColor).Returns(Colors.White);
+
+            var metadata = new MessageMetadata(message, optionsMock.Object, siteOptionsMock.Object, null, null, false);
+
+            Assert.AreEqual(Colors.Yellow, metadata.BackColor);
+            Assert.AreEqual(Colors.Black, metadata.ForeColor);
+        }
+        [Test]
         public void SubscriptionNoticeColorTest()
         {
             var message = new TwitchNotice("")
