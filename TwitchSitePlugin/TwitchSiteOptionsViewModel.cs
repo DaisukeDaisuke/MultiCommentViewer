@@ -36,6 +36,66 @@ namespace TwitchSitePlugin
             get { return ChangedOptions.SubscriptionNoticeForeColor; }
             set { ChangedOptions.SubscriptionNoticeForeColor = value; }
         }
+        public bool IgnoreAllUserNotices
+        {
+            get => ChangedOptions.IgnoreAllUserNotices;
+            set => ChangedOptions.IgnoreAllUserNotices = value;
+        }
+        public bool ReceiveUserNoticeAnongiftpaidupgrade
+        {
+            get => ChangedOptions.ReceiveUserNoticeAnongiftpaidupgrade;
+            set => ChangedOptions.ReceiveUserNoticeAnongiftpaidupgrade = value;
+        }
+        public bool ReceiveUserNoticeAnonsubgift
+        {
+            get => ChangedOptions.ReceiveUserNoticeAnonsubgift;
+            set => ChangedOptions.ReceiveUserNoticeAnonsubgift = value;
+        }
+        public bool ReceiveUserNoticeAnonsubmysterygift
+        {
+            get => ChangedOptions.ReceiveUserNoticeAnonsubmysterygift;
+            set => ChangedOptions.ReceiveUserNoticeAnonsubmysterygift = value;
+        }
+        public bool ReceiveUserNoticeGiftpaidupgrade
+        {
+            get => ChangedOptions.ReceiveUserNoticeGiftpaidupgrade;
+            set => ChangedOptions.ReceiveUserNoticeGiftpaidupgrade = value;
+        }
+        public bool ReceiveUserNoticeRaid
+        {
+            get => ChangedOptions.ReceiveUserNoticeRaid;
+            set => ChangedOptions.ReceiveUserNoticeRaid = value;
+        }
+        public bool ReceiveUserNoticeResub
+        {
+            get => ChangedOptions.ReceiveUserNoticeResub;
+            set => ChangedOptions.ReceiveUserNoticeResub = value;
+        }
+        public bool ReceiveUserNoticeRitual
+        {
+            get => ChangedOptions.ReceiveUserNoticeRitual;
+            set => ChangedOptions.ReceiveUserNoticeRitual = value;
+        }
+        public bool ReceiveUserNoticeSub
+        {
+            get => ChangedOptions.ReceiveUserNoticeSub;
+            set => ChangedOptions.ReceiveUserNoticeSub = value;
+        }
+        public bool ReceiveUserNoticeSubgift
+        {
+            get => ChangedOptions.ReceiveUserNoticeSubgift;
+            set => ChangedOptions.ReceiveUserNoticeSubgift = value;
+        }
+        public bool ReceiveUserNoticeSubmysterygift
+        {
+            get => ChangedOptions.ReceiveUserNoticeSubmysterygift;
+            set => ChangedOptions.ReceiveUserNoticeSubmysterygift = value;
+        }
+        public bool ReceiveUserNoticeOther
+        {
+            get => ChangedOptions.ReceiveUserNoticeOther;
+            set => ChangedOptions.ReceiveUserNoticeOther = value;
+        }
         private readonly TwitchSiteOptions _origin;
         private readonly TwitchSiteOptions changed;
         internal TwitchSiteOptions OriginOptions { get { return _origin; } }

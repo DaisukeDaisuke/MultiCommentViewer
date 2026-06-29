@@ -15,6 +15,18 @@ namespace TwitchSitePlugin
         public Color NoticeForeColor { get => GetValue(); set => SetValue(value); }
         public Color SubscriptionNoticeBackColor { get => GetValue(); set => SetValue(value); }
         public Color SubscriptionNoticeForeColor { get => GetValue(); set => SetValue(value); }
+        public bool IgnoreAllUserNotices { get => GetValue(); set => SetValue(value); }
+        public bool ReceiveUserNoticeAnongiftpaidupgrade { get => GetValue(); set => SetValue(value); }
+        public bool ReceiveUserNoticeAnonsubgift { get => GetValue(); set => SetValue(value); }
+        public bool ReceiveUserNoticeAnonsubmysterygift { get => GetValue(); set => SetValue(value); }
+        public bool ReceiveUserNoticeGiftpaidupgrade { get => GetValue(); set => SetValue(value); }
+        public bool ReceiveUserNoticeRaid { get => GetValue(); set => SetValue(value); }
+        public bool ReceiveUserNoticeResub { get => GetValue(); set => SetValue(value); }
+        public bool ReceiveUserNoticeRitual { get => GetValue(); set => SetValue(value); }
+        public bool ReceiveUserNoticeSub { get => GetValue(); set => SetValue(value); }
+        public bool ReceiveUserNoticeSubgift { get => GetValue(); set => SetValue(value); }
+        public bool ReceiveUserNoticeSubmysterygift { get => GetValue(); set => SetValue(value); }
+        public bool ReceiveUserNoticeOther { get => GetValue(); set => SetValue(value); }
         protected override void Init()
         {
             Dict.Add(nameof(NeedAutoSubNickname), new Item { DefaultValue = false, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
@@ -23,6 +35,18 @@ namespace TwitchSitePlugin
             Dict.Add(nameof(NoticeForeColor), new Item { DefaultValue = ColorFromArgb("#FF000000"), Predicate = c => true, Serializer = c => ColorToArgb(c), Deserializer = s => ColorFromArgb(s) });
             Dict.Add(nameof(SubscriptionNoticeBackColor), new Item { DefaultValue = ColorFromArgb("#FF5E35B1"), Predicate = c => true, Serializer = c => ColorToArgb(c), Deserializer = s => ColorFromArgb(s) });
             Dict.Add(nameof(SubscriptionNoticeForeColor), new Item { DefaultValue = ColorFromArgb("#FFFFFFFF"), Predicate = c => true, Serializer = c => ColorToArgb(c), Deserializer = s => ColorFromArgb(s) });
+            Dict.Add(nameof(IgnoreAllUserNotices), CreateBoolItem(false));
+            Dict.Add(nameof(ReceiveUserNoticeAnongiftpaidupgrade), CreateBoolItem(true));
+            Dict.Add(nameof(ReceiveUserNoticeAnonsubgift), CreateBoolItem(true));
+            Dict.Add(nameof(ReceiveUserNoticeAnonsubmysterygift), CreateBoolItem(true));
+            Dict.Add(nameof(ReceiveUserNoticeGiftpaidupgrade), CreateBoolItem(true));
+            Dict.Add(nameof(ReceiveUserNoticeRaid), CreateBoolItem(true));
+            Dict.Add(nameof(ReceiveUserNoticeResub), CreateBoolItem(true));
+            Dict.Add(nameof(ReceiveUserNoticeRitual), CreateBoolItem(true));
+            Dict.Add(nameof(ReceiveUserNoticeSub), CreateBoolItem(true));
+            Dict.Add(nameof(ReceiveUserNoticeSubgift), CreateBoolItem(true));
+            Dict.Add(nameof(ReceiveUserNoticeSubmysterygift), CreateBoolItem(true));
+            Dict.Add(nameof(ReceiveUserNoticeOther), CreateBoolItem(true));
         }
         internal TwitchSiteOptions Clone()
         {
@@ -61,6 +85,10 @@ namespace TwitchSitePlugin
         {
             var argb = color.ToString();
             return argb;
+        }
+        private Item CreateBoolItem(bool defaultValue)
+        {
+            return new Item { DefaultValue = defaultValue, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) };
         }
         #endregion
     }

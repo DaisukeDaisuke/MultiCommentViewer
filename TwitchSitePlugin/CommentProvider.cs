@@ -387,38 +387,121 @@ namespace TwitchSitePlugin
 
         private void OnUserNoticeReceived(Result result)
         {
-            if (IsIgnoredUserNotice(result))
-                return;
-
             var systemMessage = GetTag(result, "system-msg");
             var userMessage = GetParam(result, 1);
-            var message = string.IsNullOrEmpty(systemMessage)
-                ? userMessage
-                : string.IsNullOrEmpty(userMessage)
-                    ? systemMessage
-                    : $"{systemMessage} {userMessage}";
 
-            if (string.IsNullOrEmpty(message))
+            if (string.IsNullOrEmpty(systemMessage) && string.IsNullOrEmpty(userMessage))
                 return;
 
-            var notice = new TwitchNotice(result.Raw)
+            if (!string.IsNullOrEmpty(systemMessage))
             {
-                Message = message,
+                if (IsIgnoredUserNotice(result))
+                    return;
+                
+                var notice = new TwitchNotice(result.Raw)
+                {
+                    Message = systemMessage,
+                };
+                var metadata = new MessageMetadata(notice, _options, _siteOptions, null, this, false)
+                {
+                    IsInitialComment = false,
+                    SiteContextGuid = SiteContextGuid,
+                };
+                var methods = new TwitchMessageMethods();
+                var messageContext = new TwitchMessageContext(notice, metadata, methods);
+                MessageReceived?.Invoke(this, messageContext);
+            }
+
+            if (!string.IsNullOrEmpty(userMessage))
+            {
+                OnUserNoticeUserMessageReceived(result, userMessage);
+            }
+        }
+
+        private void OnUserNoticeUserMessageReceived(Result result, string userMessage)
+        {
+            var userId = GetTag(result, "user-id");
+            var username = GetTag(result, "login");
+            var displayName = GetTag(result, "display-name");
+            if (string.IsNullOrEmpty(displayName))
+                displayName = username;
+            var isFirstComment = _commentCounter.UpdateCount(userId);
+            var user = GetUser(userId);
+            if (_siteOptions.NeedAutoSubNickname)
+            {
+                SitePluginCommon.Utils.SetNickname(userMessage, user, _siteOptions.NeedAutoSubNicknameStr);
+            }
+            var message = new TwitchComment(result.Raw)
+            {
+                CommentItems = Tools.GetMessageItems(result),
+                Id = GetTag(result, "id"),
+                UserName = username,
+                PostTime = GetSentAt(result).ToString("HH:mm:ss"),
+                UserId = userId,
+                IsDisplayNameSame = username == displayName,
+                DisplayName = displayName,
             };
-            var metadata = new MessageMetadata(notice, _options, _siteOptions, null, this, false)
+            var metadata = new MessageMetadata(message, _options, _siteOptions, user, this, isFirstComment)
             {
                 IsInitialComment = false,
                 SiteContextGuid = SiteContextGuid,
             };
             var methods = new TwitchMessageMethods();
-            var messageContext = new TwitchMessageContext(notice, metadata, methods);
+            var messageContext = new TwitchMessageContext(message, metadata, methods);
             MessageReceived?.Invoke(this, messageContext);
         }
 
-        private static bool IsIgnoredUserNotice(Result result)
+        private bool IsIgnoredUserNotice(Result result)
         {
-            return string.Equals(GetTag(result, "msg-id"), "viewermilestone", StringComparison.OrdinalIgnoreCase)
+            if (_siteOptions.IgnoreAllUserNotices)
+                return true;
+
+            var msgId = GetTag(result, "msg-id");
+            if (!ShouldReceiveUserNotice(msgId))
+                return true;
+
+            return string.Equals(msgId, "viewermilestone", StringComparison.OrdinalIgnoreCase)
                 && string.Equals(GetTag(result, "msg-param-category"), "watch-streak", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private bool ShouldReceiveUserNotice(string msgId)
+        {
+            switch (msgId.ToLowerInvariant())
+            {
+                case "anongiftpaidupgrade":
+                    return _siteOptions.ReceiveUserNoticeAnongiftpaidupgrade;
+                case "anonsubgift":
+                    return _siteOptions.ReceiveUserNoticeAnonsubgift;
+                case "anonsubmysterygift":
+                    return _siteOptions.ReceiveUserNoticeAnonsubmysterygift;
+                case "giftpaidupgrade":
+                    return _siteOptions.ReceiveUserNoticeGiftpaidupgrade;
+                case "raid":
+                    return _siteOptions.ReceiveUserNoticeRaid;
+                case "resub":
+                    return _siteOptions.ReceiveUserNoticeResub;
+                case "ritual":
+                    return _siteOptions.ReceiveUserNoticeRitual;
+                case "sub":
+                    return _siteOptions.ReceiveUserNoticeSub;
+                case "subgift":
+                    return _siteOptions.ReceiveUserNoticeSubgift;
+                case "submysterygift":
+                    return _siteOptions.ReceiveUserNoticeSubmysterygift;
+                default:
+                    return _siteOptions.ReceiveUserNoticeOther;
+            }
+        }
+
+        private static DateTime GetSentAt(Result result)
+        {
+            long ts;
+            if (long.TryParse(GetTag(result, "tmi-sent-ts"), out ts))
+            {
+                var unix = new DateTime(1970, 1, 1).AddMilliseconds(ts);
+                return unix.ToLocalTime();
+            }
+            return DateTime.Now;
         }
 
         private static string GetTag(Result result, string key)

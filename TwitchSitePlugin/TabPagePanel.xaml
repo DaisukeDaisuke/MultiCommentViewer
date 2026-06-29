@@ -6,8 +6,9 @@
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              xmlns:local="clr-namespace:TwitchSitePlugin"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
+             d:DesignHeight="520" d:DesignWidth="300">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <Grid Height="490">
         <CheckBox x:Name="AutoSubNicknameCheckBox" Content="コテハン認識文字のあとの文字列を自動的にコテハンとして登録する" IsChecked="{Binding NeedAutoSubNickname}" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top"/>
         <Label Content="コテハン認識文字" IsEnabled="{Binding ElementName=AutoSubNicknameCheckBox, Path=IsChecked}" HorizontalAlignment="Left" Margin="30,50,0,0" VerticalAlignment="Top"/>
         <TextBox IsEnabled="{Binding ElementName=AutoSubNicknameCheckBox, Path=IsChecked}" HorizontalAlignment="Stretch" Height="23" Margin="129,53,26,0" TextWrapping="Wrap" Text="{Binding NeedAutoSubNicknameStr}" VerticalAlignment="Top"/>
@@ -15,6 +16,20 @@
         <xctk:ColorPicker  SelectedColor="{Binding SubscriptionNoticeBackColor}" Margin="155,89,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Height="22" />
         <Label x:Name="labelSubscriptionNoticeForeColor" Content="通知の文字色" HorizontalAlignment="Left" Margin="10,115,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.163,0.462"/>
         <xctk:ColorPicker  SelectedColor="{Binding SubscriptionNoticeForeColor}" Margin="155,119,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Height="22" />
+        <Label Content="USERNOTICE" HorizontalAlignment="Left" Margin="10,150,0,0" VerticalAlignment="Top"/>
+        <CheckBox x:Name="IgnoreAllUserNoticesCheckBox" Content="すべて受信しない" IsChecked="{Binding IgnoreAllUserNotices}" HorizontalAlignment="Left" Margin="30,175,0,0" VerticalAlignment="Top"/>
+        <CheckBox Content="anongiftpaidupgrade" IsChecked="{Binding ReceiveUserNoticeAnongiftpaidupgrade}" HorizontalAlignment="Left" Margin="30,200,0,0" VerticalAlignment="Top"/>
+        <CheckBox Content="anonsubgift" IsChecked="{Binding ReceiveUserNoticeAnonsubgift}" HorizontalAlignment="Left" Margin="30,225,0,0" VerticalAlignment="Top"/>
+        <CheckBox Content="anonsubmysterygift" IsChecked="{Binding ReceiveUserNoticeAnonsubmysterygift}" HorizontalAlignment="Left" Margin="30,250,0,0" VerticalAlignment="Top"/>
+        <CheckBox Content="giftpaidupgrade" IsChecked="{Binding ReceiveUserNoticeGiftpaidupgrade}" HorizontalAlignment="Left" Margin="30,275,0,0" VerticalAlignment="Top"/>
+        <CheckBox Content="raid" IsChecked="{Binding ReceiveUserNoticeRaid}" HorizontalAlignment="Left" Margin="30,300,0,0" VerticalAlignment="Top"/>
+        <CheckBox Content="resub" IsChecked="{Binding ReceiveUserNoticeResub}" HorizontalAlignment="Left" Margin="30,325,0,0" VerticalAlignment="Top"/>
+        <CheckBox Content="ritual" IsChecked="{Binding ReceiveUserNoticeRitual}" HorizontalAlignment="Left" Margin="30,350,0,0" VerticalAlignment="Top"/>
+        <CheckBox Content="sub" IsChecked="{Binding ReceiveUserNoticeSub}" HorizontalAlignment="Left" Margin="30,375,0,0" VerticalAlignment="Top"/>
+        <CheckBox Content="subgift" IsChecked="{Binding ReceiveUserNoticeSubgift}" HorizontalAlignment="Left" Margin="30,400,0,0" VerticalAlignment="Top"/>
+        <CheckBox Content="submysterygift" IsChecked="{Binding ReceiveUserNoticeSubmysterygift}" HorizontalAlignment="Left" Margin="30,425,0,0" VerticalAlignment="Top"/>
+        <CheckBox Content="それ以外" IsChecked="{Binding ReceiveUserNoticeOther}" HorizontalAlignment="Left" Margin="30,450,0,0" VerticalAlignment="Top"/>
 
     </Grid>
+    </ScrollViewer>
 </UserControl>
