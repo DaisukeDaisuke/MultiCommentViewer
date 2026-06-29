@@ -386,6 +386,9 @@ namespace TwitchSitePlugin
 
         private void OnUserNoticeReceived(Result result)
         {
+            if (IsIgnoredUserNotice(result))
+                return;
+
             var systemMessage = GetTag(result, "system-msg");
             var userMessage = GetParam(result, 1);
             var message = string.IsNullOrEmpty(systemMessage)
@@ -409,6 +412,12 @@ namespace TwitchSitePlugin
             var methods = new TwitchMessageMethods();
             var messageContext = new TwitchMessageContext(notice, metadata, methods);
             MessageReceived?.Invoke(this, messageContext);
+        }
+
+        private static bool IsIgnoredUserNotice(Result result)
+        {
+            return string.Equals(GetTag(result, "msg-id"), "viewermilestone", StringComparison.OrdinalIgnoreCase)
+                && string.Equals(GetTag(result, "msg-param-category"), "watch-streak", StringComparison.OrdinalIgnoreCase);
         }
 
         private static string GetTag(Result result, string key)

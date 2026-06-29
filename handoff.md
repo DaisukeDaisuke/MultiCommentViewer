@@ -5,3 +5,4 @@
 - Tools.Parse で IRC タグ値のエスケープを解除し、タグキー検索とコマンド名の大小差を吸収するようにした。
 - 接続中に Input の自動サイト選択やサイト選択UIの書き戻しが走ると ConnectionViewModel.SelectedSite の assert に当たるため、接続中のサイト変更は無視してUIへ現在値を通知し直すようにした。
 - Twitch Notice の既定色は黄色背景に白文字で読みにくいため、既定の NoticeForeColor を黒にした。
+- USERNOTICE の viewermilestone かつ msg-param-category=watch-streak は連続視聴記録通知なので表示しない。

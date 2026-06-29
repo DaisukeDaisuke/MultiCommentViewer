@@ -247,6 +247,39 @@ namespace TwitchSitePluginTests
             return;
         }
         [Test]
+        public async Task UserNoticeの連続視聴記録は無視する()
+        {
+            var data = TestHelper.GetSampleData("Streams.txt");
+            var raw = "@badge-info=subscriber/20;badges=subscriber/18,premium/1;color=;display-name=antiguovecino;emotes=;flags=;id=f468eac5-5040-4f68-88d8-527af08a0746;login=antiguovecino;mod=0;msg-id=viewermilestone;msg-param-category=watch-streak;msg-param-copoReward=450;msg-param-id=639db72e-b9a4-48e4-9599-beae8f65d407;msg-param-value=425;room-id=1140571796;subscriber=1;system-msg=antiguovecino\\swatched\\s425\\sconsecutive\\sstreams\\sand\\ssparked\\sa\\swatch\\sstreak!;tmi-sent-ts=1782716609954;user-id=1114650305;user-type=;vip=0 :tmi.twitch.tv USERNOTICE #lapizarradeandres";
+            var serverMock = new Mock<IDataServer>();
+            serverMock.Setup(s => s.GetAsync(It.IsAny<string>(), It.IsAny<Dictionary<string, string>>())).Returns(Task.FromResult(data));
+            var loggerMock = new Mock<ILogger>();
+            var optionsMock = new Mock<ICommentOptions>();
+            var siteOptions = new TwitchSiteOptions
+            {
+                NeedAutoSubNickname = true
+            };
+            var userStoreMock = new Mock<IUserStoreManager>();
+            var browserProfileMock = new Mock<IBrowserProfile>();
+            var messageProvider = new MessageProvider();
+            var commentProvider = new C(serverMock.Object, loggerMock.Object, optionsMock.Object, siteOptions, userStoreMock.Object)
+            {
+                MessageProvider = messageProvider,
+                MetadataProvider = new MetadataProvider(),
+            };
+            var received = false;
+            commentProvider.MessageReceived += (s, e) =>
+            {
+                received = true;
+            };
+            var t = commentProvider.ConnectAsync("", browserProfileMock.Object);
+            messageProvider.SetResult(raw);
+            commentProvider.Disconnect();
+            await t;
+            Assert.IsFalse(received);
+            return;
+        }
+        [Test]
         public async Task GetCurrentUserInfoTest()
         {
             var serverMock = new Mock<IDataServer>();
