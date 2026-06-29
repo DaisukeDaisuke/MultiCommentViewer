@@ -11,14 +11,10 @@
         <CheckBox x:Name="AutoSubNicknameCheckBox" Content="コテハン認識文字のあとの文字列を自動的にコテハンとして登録する" IsChecked="{Binding NeedAutoSubNickname}" HorizontalAlignment="Left" Margin="10,30,0,0" VerticalAlignment="Top"/>
         <Label Content="コテハン認識文字" IsEnabled="{Binding ElementName=AutoSubNicknameCheckBox, Path=IsChecked}" HorizontalAlignment="Left" Margin="30,50,0,0" VerticalAlignment="Top"/>
         <TextBox IsEnabled="{Binding ElementName=AutoSubNicknameCheckBox, Path=IsChecked}" HorizontalAlignment="Stretch" Height="23" Margin="129,53,26,0" TextWrapping="Wrap" Text="{Binding NeedAutoSubNicknameStr}" VerticalAlignment="Top"/>
-        <Label x:Name="labelNoticeBackColor" Content="Noticeの背景色" HorizontalAlignment="Left" Margin="10,85,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.163,0.462"/>
-        <xctk:ColorPicker  SelectedColor="{Binding NoticeBackColor}" Margin="155,89,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Height="22" />
-        <Label x:Name="labelNoticeForeColor" Content="Noticeの文字色" HorizontalAlignment="Left" Margin="10,115,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.163,0.462"/>
-        <xctk:ColorPicker  SelectedColor="{Binding NoticeForeColor}" Margin="155,119,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Height="22" />
-        <Label x:Name="labelSubscriptionNoticeBackColor" Content="サブスク通知の背景色" HorizontalAlignment="Left" Margin="10,145,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.163,0.462"/>
-        <xctk:ColorPicker  SelectedColor="{Binding SubscriptionNoticeBackColor}" Margin="155,149,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Height="22" />
-        <Label x:Name="labelSubscriptionNoticeForeColor" Content="サブスク通知の文字色" HorizontalAlignment="Left" Margin="10,175,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.163,0.462"/>
-        <xctk:ColorPicker  SelectedColor="{Binding SubscriptionNoticeForeColor}" Margin="155,179,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Height="22" />
+        <Label x:Name="labelSubscriptionNoticeBackColor" Content="通知の背景色" HorizontalAlignment="Left" Margin="10,85,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.163,0.462"/>
+        <xctk:ColorPicker  SelectedColor="{Binding SubscriptionNoticeBackColor}" Margin="155,89,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Height="22" />
+        <Label x:Name="labelSubscriptionNoticeForeColor" Content="通知の文字色" HorizontalAlignment="Left" Margin="10,115,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.163,0.462"/>
+        <xctk:ColorPicker  SelectedColor="{Binding SubscriptionNoticeForeColor}" Margin="155,119,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Height="22" />
 
     </Grid>
 </UserControl>

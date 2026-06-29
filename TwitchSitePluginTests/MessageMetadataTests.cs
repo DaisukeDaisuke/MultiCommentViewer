@@ -84,8 +84,8 @@ namespace TwitchSitePluginTests
 
             var metadata = new MessageMetadata(message, optionsMock.Object, siteOptionsMock.Object, null, null, false);
 
-            Assert.AreEqual(Colors.Yellow, metadata.BackColor);
-            Assert.AreEqual(Colors.Black, metadata.ForeColor);
+            Assert.AreEqual(Colors.Purple, metadata.BackColor);
+            Assert.AreEqual(Colors.White, metadata.ForeColor);
         }
         [Test]
         public void SubscriptionNoticeColorTest()

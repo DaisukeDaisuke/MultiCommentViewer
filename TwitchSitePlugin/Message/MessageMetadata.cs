@@ -17,11 +17,7 @@ namespace TwitchSitePlugin
             {
                 if (_message is ITwitchNotice)
                 {
-                    if (_message is TwitchNotice notice && notice.IsSubscription)
-                    {
-                        return _siteOptions.SubscriptionNoticeBackColor;
-                    }
-                    return _siteOptions.NoticeBackColor;
+                    return _siteOptions.SubscriptionNoticeBackColor;
                 }
                 else if (User != null && !string.IsNullOrEmpty(User.BackColorArgb))
                 {
@@ -45,11 +41,7 @@ namespace TwitchSitePlugin
             {
                 if (_message is ITwitchNotice)
                 {
-                    if (_message is TwitchNotice notice && notice.IsSubscription)
-                    {
-                        return _siteOptions.SubscriptionNoticeForeColor;
-                    }
-                    return _siteOptions.NoticeForeColor;
+                    return _siteOptions.SubscriptionNoticeForeColor;
                 }
                 else if (User != null && !string.IsNullOrEmpty(User.ForeColorArgb))
                 {
