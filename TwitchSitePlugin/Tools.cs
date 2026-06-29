@@ -358,10 +358,10 @@ namespace TwitchSitePlugin
                 var sub = s.Substring(1, sPos - 1).Split(';');
                 foreach (var kv in sub)
                 {
-                    var arr = kv.Split('=');
+                    var arr = kv.Split(new[] { '=' }, 2);
                     if (arr.Length == 2)
                     {
-                        result.Tags.Add(arr[0], arr[1]);
+                        result.Tags.Add(arr[0], UnescapeIrcTagValue(arr[1]));
                     }
                     else
                     {
@@ -384,11 +384,11 @@ namespace TwitchSitePlugin
             r = s.IndexOf(' ', n);
             if (r == -1)
             {
-                result.Command = s.Length > n ? s.Substring(n) : null;
+                result.Command = s.Length > n ? s.Substring(n).ToUpperInvariant() : null;
                 n = r + 1;
                 return result;
             }
-            result.Command = s.Substring(n, r - n);
+            result.Command = s.Substring(n, r - n).ToUpperInvariant();
             n = r + 1;
             while (s[n] == ' ')
                 n++;
@@ -419,6 +419,43 @@ namespace TwitchSitePlugin
             return result;
         }
 
+        private static string UnescapeIrcTagValue(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return value;
+
+            var sb = new StringBuilder();
+            for (var i = 0; i < value.Length; i++)
+            {
+                if (value[i] != '\\' || i + 1 >= value.Length)
+                {
+                    sb.Append(value[i]);
+                    continue;
+                }
+
+                i++;
+                switch (value[i])
+                {
+                    case 's':
+                        sb.Append(' ');
+                        break;
+                    case ':':
+                        sb.Append(';');
+                        break;
+                    case 'r':
+                        sb.Append('\r');
+                        break;
+                    case 'n':
+                        sb.Append('\n');
+                        break;
+                    default:
+                        sb.Append(value[i]);
+                        break;
+                }
+            }
+            return sb.ToString();
+        }
+
         //public static string GetRandomGuestUsername()
         //{
         //    //return "justinfan" + Math.floor(8e4 * Math.random() + 1e3)
@@ -438,7 +475,7 @@ namespace TwitchSitePlugin
     public class Result
     {
         public string Raw { get; set; }
-        public Dictionary<string, string> Tags { get; set; } = new Dictionary<string, string>();
+        public Dictionary<string, string> Tags { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         public string Prefix { get; set; }
         public string Command { get; set; }
         public List<string> Params { get; set; } = new List<string>();
