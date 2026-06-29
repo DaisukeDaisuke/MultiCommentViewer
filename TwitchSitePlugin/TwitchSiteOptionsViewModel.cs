@@ -26,6 +26,16 @@ namespace TwitchSitePlugin
             get { return ChangedOptions.NoticeForeColor; }
             set { ChangedOptions.NoticeForeColor = value; }
         }
+        public Color SubscriptionNoticeBackColor
+        {
+            get { return ChangedOptions.SubscriptionNoticeBackColor; }
+            set { ChangedOptions.SubscriptionNoticeBackColor = value; }
+        }
+        public Color SubscriptionNoticeForeColor
+        {
+            get { return ChangedOptions.SubscriptionNoticeForeColor; }
+            set { ChangedOptions.SubscriptionNoticeForeColor = value; }
+        }
         private readonly TwitchSiteOptions _origin;
         private readonly TwitchSiteOptions changed;
         internal TwitchSiteOptions OriginOptions { get { return _origin; } }

@@ -9,5 +9,7 @@ namespace TwitchSitePlugin
         string NeedAutoSubNicknameStr { get; }
         Color NoticeBackColor { get; }
         Color NoticeForeColor { get; }
+        Color SubscriptionNoticeBackColor { get; }
+        Color SubscriptionNoticeForeColor { get; }
     }
 }

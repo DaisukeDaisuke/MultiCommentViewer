@@ -373,6 +373,7 @@ namespace TwitchSitePlugin
             var notice = new TwitchNotice(result.Raw)
             {
                 Message = message,
+                IsSubscription = true,
             };
             var metadata = new MessageMetadata(notice, _options, _siteOptions, null, this, false)
             {
