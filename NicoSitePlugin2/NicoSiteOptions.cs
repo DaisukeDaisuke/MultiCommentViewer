@@ -27,6 +27,18 @@ namespace NicoSitePlugin
         public bool IsShowEmotion { get => GetValue(); set => SetValue(value); }
         public Color EmotionBackColor { get => GetValue(); set => SetValue(value); }
         public Color EmotionForeColor { get => GetValue(); set => SetValue(value); }
+        public bool IsReceiveProgramExtended { get => GetValue(); set => SetValue(value); }
+        public bool IsReceiveIchiba { get => GetValue(); set => SetValue(value); }
+        public bool IsReceiveRankingIn { get => GetValue(); set => SetValue(value); }
+        public bool IsReceiveVisited { get => GetValue(); set => SetValue(value); }
+        public bool IsReceiveCruise { get => GetValue(); set => SetValue(value); }
+        public bool IsReceiveEmotion { get => GetValue(); set => SetValue(value); }
+        public bool IsReceiveSupporterRegistered { get => GetValue(); set => SetValue(value); }
+        public bool IsReceiveUserLevelUp { get => GetValue(); set => SetValue(value); }
+        public bool IsReceiveGift { get => GetValue(); set => SetValue(value); }
+        public bool IsReceiveNicoad { get => GetValue(); set => SetValue(value); }
+        public bool IsReceiveOperatorComment { get => GetValue(); set => SetValue(value); }
+        public bool IsReceiveVote { get => GetValue(); set => SetValue(value); }
         protected override void Init()
         {
             Dict.Add(nameof(OfficialRoomsRetrieveCount), new Item { DefaultValue = 3, Predicate = n => n > 0, Serializer = n => n.ToString(), Deserializer = s => int.Parse(s) });
@@ -38,8 +50,8 @@ namespace NicoSitePlugin
 
             Dict.Add(nameof(IsShow184), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
             Dict.Add(nameof(IsAutoSetNickname), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
-            Dict.Add(nameof(IsShow184Id), new Item { DefaultValue = false, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
-            Dict.Add(nameof(IsAutoGetUsername), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
+            Dict.Add(nameof(IsShow184Id), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
+            Dict.Add(nameof(IsAutoGetUsername), new Item { DefaultValue = false, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
 
             Dict.Add(nameof(AdBackColor), new Item { DefaultValue = ColorFromArgb("#FFFFFFFF"), Predicate = c => true, Serializer = c => ColorToArgb(c), Deserializer = s => ColorFromArgb(s) });
             Dict.Add(nameof(AdForeColor), new Item { DefaultValue = ColorFromArgb("#FFFF0000"), Predicate = c => true, Serializer = c => ColorToArgb(c), Deserializer = s => ColorFromArgb(s) });
@@ -50,6 +62,18 @@ namespace NicoSitePlugin
             Dict.Add(nameof(IsShowEmotion), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
             Dict.Add(nameof(EmotionBackColor), new Item { DefaultValue = ColorFromArgb("#FFFFFFFF"), Predicate = c => true, Serializer = c => ColorToArgb(c), Deserializer = s => ColorFromArgb(s) });
             Dict.Add(nameof(EmotionForeColor), new Item { DefaultValue = ColorFromArgb("#FFFF0000"), Predicate = c => true, Serializer = c => ColorToArgb(c), Deserializer = s => ColorFromArgb(s) });
+            Dict.Add(nameof(IsReceiveProgramExtended), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
+            Dict.Add(nameof(IsReceiveIchiba), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
+            Dict.Add(nameof(IsReceiveRankingIn), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
+            Dict.Add(nameof(IsReceiveVisited), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
+            Dict.Add(nameof(IsReceiveCruise), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
+            Dict.Add(nameof(IsReceiveEmotion), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
+            Dict.Add(nameof(IsReceiveSupporterRegistered), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
+            Dict.Add(nameof(IsReceiveUserLevelUp), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
+            Dict.Add(nameof(IsReceiveGift), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
+            Dict.Add(nameof(IsReceiveNicoad), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
+            Dict.Add(nameof(IsReceiveOperatorComment), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
+            Dict.Add(nameof(IsReceiveVote), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
         }
         internal NicoSiteOptions Clone()
         {

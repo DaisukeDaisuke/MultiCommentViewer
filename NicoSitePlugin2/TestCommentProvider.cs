@@ -1,6 +1,5 @@
 ﻿using Common;
 using Dwango.Nicolive.Chat.Service.Edge;
-using Newtonsoft.Json;
 using NicoSitePlugin.Metadata;
 using NicoSitePlugin2.Client;
 using ryu_s.BrowserCookie;
@@ -49,7 +48,6 @@ namespace NicoSitePlugin
                 AfterDisconnected();
                 return;
             }
-            _isFirstConnection = true;
             _isDisconnectedExpected = false;
         reload:
             var isManualDisconnect = _isDisconnectedExpected;
@@ -108,7 +106,6 @@ namespace NicoSitePlugin
             _dataProps = null;
             if (!_isDisconnectedExpected)
             {
-                _isFirstConnection = false;
                 goto reload;
             }
             var m = new NicoDisconnected("");
@@ -313,58 +310,11 @@ namespace NicoSitePlugin
             return (float)Math.Round(differenceInSeconds + diff, 2);
         }
 
-        /// <summary>
-        /// 初期コメント取得中か
-        /// </summary>
-        private bool _isInitialCommentsReceiving = true;
         protected readonly ConcurrentDictionary<string, int> _userCommentCountDict = new ConcurrentDictionary<string, int>();
         /// <summary>
         /// 意図的な切断か
         /// </summary>
         private bool _isDisconnectedExpected;
-        /// <summary>
-        /// 一番最初の接続か。再接続時はfalse。
-        /// 再接続時は初期コメントが不要だから主にその判別に使うフラグ
-        /// </summary>
-        private bool _isFirstConnection;
-        private static bool IsAd(Chat.ChatMessage chat)
-        {
-            return chat.Content.StartsWith("/nicoad ");
-        }
-        private static bool IsGift(Chat.ChatMessage chat)
-        {
-            return chat.Content.StartsWith("/gift ");
-        }
-        private static bool IsSpi(Chat.ChatMessage chat)
-        {
-            return chat.Content.StartsWith("/spi ");
-        }
-        private static bool IsEmotion(Chat.ChatMessage chat)
-        {
-            return chat.Content.StartsWith("/emotion ");
-        }
-        private static bool IsInfo(Chat.ChatMessage chat)
-        {
-            return chat.Content.StartsWith("/info ");
-        }
-        private static bool IsDisconnect(Chat.ChatMessage chat)
-        {
-            return chat.Content == "/disconnect";
-        }
-        /// <summary>
-        /// 生IDか
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <returns></returns>
-        private bool IsRawUserId(string userId)
-        {
-            return !string.IsNullOrEmpty(userId) && Regex.IsMatch(userId, "^\\d+$");
-        }
-        private Task<string> GetUserName(string userId)
-        {
-            throw new NotImplementedException();
-        }
-        private const string SystemUserId = "900000000";
         private static string? GetThumbnail(string userId)
         {
             if (long.TryParse(userId, out var userIdNum))
@@ -374,219 +324,10 @@ namespace NicoSitePlugin
             }
             return null;
         }
-        private async Task ProcessChatMessageAsync(Chat.IChatMessage message)
-        {
-            switch (message)
-            {
-                case Chat.ChatMessage chat:
-                    {
-                        if (_isFirstConnection == false && _isInitialCommentsReceiving == true)
-                        {
-                            //再接続時は初期コメントを無視する
-                            return;
-                        }
-                        var userId = chat.UserId;
-                        var user = GetUser(userId);
-                        bool isFirstComment;
-                        if (_userCommentCountDict.ContainsKey(userId))
-                        {
-                            _userCommentCountDict[userId]++;
-                            isFirstComment = false;
-                        }
-                        else
-                        {
-                            _userCommentCountDict.AddOrUpdate(userId, 1, (s, n) => n);
-                            isFirstComment = true;
-                        }
-                        var thumbNailUrl = GetThumbnail(userId);
-                        //var comment = await Tools.CreateNicoComment(chat, user, _siteOptions, roomName, async userid => await API.GetUserInfo(_dataSource, userid), _logger);
-                        INicoMessage comment;
-                        INicoMessageMetadata metadata;
-                        if (IsAd(chat))
-                        {
-                            ///nicoad {"totalAdPoint":215500,"message":"シュガーさんが1700ptニコニ広告しました","version":"1"}
-                            var adJson = chat.Content.Replace("/nicoad", "");
-                            dynamic d = JsonConvert.DeserializeObject(adJson);
-                            if ((string)d.version != "1")
-                            {
-                                throw new ParseException(chat.Raw);
-                            }
-                            var content = (string)d.message;
-                            var ad = new NicoAd(chat.Raw)
-                            {
-                                PostedAt = Common.UnixTimeConverter.FromUnixTime(chat.Date),
-                                UserId = userId,
-                                Text = content,
-                            };
-                            comment = ad;
-                            metadata = new AdMessageMetadata(ad, _options, _siteOptions)
-                            {
-                                IsInitialComment = _isInitialCommentsReceiving,
-                                SiteContextGuid = SiteContextGuid,
-                            };
-                        }
-                        else if (IsGift(chat))
-                        {
-                            var match = Regex.Match(chat.Content, "/gift (\\S+) (\\d+|NULL) \"(\\S+)\" (\\d+) \"(\\S*)\" \"(\\S+)\"(?: (\\d+))?");
-                            if (!match.Success)
-                            {
-                                throw new ParseException(chat.Raw);
-                            }
-                            var giftId = match.Groups[1].Value;
-                            var userIdp = match.Groups[2].Value;//ギフトを投げた人。userId == "900000000"
-                            var username = match.Groups[3].Value;
-                            var point = match.Groups[4].Value;
-                            var what = match.Groups[5].Value;
-                            var itemName = match.Groups[6].Value;
-                            var itemCount = match.Groups[7].Value;//アイテムの個数？ギフト貢献n位？
-                            var text = $"{username}さんがギフト「{itemName}（{point}pt）」を贈りました";
-                            var gift = new NicoGift(chat.Raw)
-                            {
-                                Text = text,
-                                PostedAt = Common.UnixTimeConverter.FromUnixTime(chat.Date),
-                                UserId = userIdp == "NULL" ? "" : userIdp,
-                                NameItems = Common.MessagePartFactory.CreateMessageItems(username),
-                            };
-                            comment = gift;
-                            metadata = new ItemMessageMetadata(gift, _options, _siteOptions)
-                            {
-                                IsInitialComment = _isInitialCommentsReceiving,
-                                SiteContextGuid = SiteContextGuid,
-                            };
-                        }
-                        else if (IsSpi(chat))
-                        {
-                            var spi = new NicoSpi(chat.Raw)
-                            {
-                                Text = chat.Content,
-                                PostedAt = Common.UnixTimeConverter.FromUnixTime(chat.Date),
-                                UserId = chat.UserId,
-                            };
-                            comment = spi;
-                            metadata = new SpiMessageMetadata(spi, _options, _siteOptions)
-                            {
-                                IsInitialComment = _isInitialCommentsReceiving,
-                                SiteContextGuid = SiteContextGuid,
-                            };
-                        }
-                        else if (IsEmotion(chat))
-                        {
-                            var content = chat.Content.Substring("/emotion ".Length);
-                            var abc = new NicoEmotion("")
-                            {
-                                ChatNo = chat.No,
-                                Anonymity = chat.Anonymity,
-                                PostedAt = Common.UnixTimeConverter.FromUnixTime(chat.Date),
-                                Content = content,
-                                UserId = chat.UserId,
-                            };
-                            comment = abc;
-                            metadata = new EmotionMessageMetadata(abc, _options, _siteOptions)
-                            {
-                                IsInitialComment = _isInitialCommentsReceiving,
-                                SiteContextGuid = SiteContextGuid,
-                            };
-                        }
-                        else if (IsInfo(chat))
-                        {
-                            var match = Regex.Match(chat.Content, "^/info (?<no>\\d+) (?<content>.+)$", RegexOptions.Singleline);
-                            if (!match.Success)
-                            {
-                                throw new ParseException(chat.Raw);
-                            }
-                            else
-                            {
-                                var no = int.Parse(match.Groups["no"].Value);
-                                var content = match.Groups["content"].Value;
-                                var info = new NicoInfo(chat.Raw)
-                                {
-                                    Text = content,
-                                    PostedAt = Common.UnixTimeConverter.FromUnixTime(chat.Date),
-                                    UserId = chat.UserId,
-                                    No = no,
-                                };
-                                comment = info;
-                                metadata = new InfoMessageMetadata(info, _options, _siteOptions)
-                                {
-                                    IsInitialComment = _isInitialCommentsReceiving,
-                                    SiteContextGuid = SiteContextGuid,
-                                };
-                            }
-                        }
-                        else
-                        {
-                            if (IsDisconnect(chat))//NicoCommentではなく専用のクラスを作っても良いかも。
-                            {
-                                _chatProvider?.Disconnect();
-                            }
-                            if (_siteOptions.IsAutoSetNickname)
-                            {
-                                var nick = SitePluginCommon.Utils.ExtractNickname(chat.Content);
-                                if (!string.IsNullOrEmpty(nick))
-                                {
-                                    user.Nickname = nick;
-                                }
-                            }
-                            var abc = new NicoComment("")
-                            {
-                                ChatNo = chat.No,
-                                Id = chat.No.ToString(),
-                                Is184 = chat.Anonymity == 1,
-                                PostedAt = Common.UnixTimeConverter.FromUnixTime(chat.Date),
-                                Text = chat.Content,
-                                UserId = chat.UserId,
-                                UserName = chat.Name,
-                                ThumbnailUrl = thumbNailUrl,
-                            };
-                            comment = abc;
-                            metadata = new CommentMessageMetadata(abc, _options, _siteOptions, user, this, isFirstComment)
-                            {
-                                IsInitialComment = _isInitialCommentsReceiving,
-                                SiteContextGuid = SiteContextGuid,
-                            };
-                        }
-
-
-                        var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
-                        RaiseMessageReceived(context);
-                    }
-                    break;
-                case Chat.Ping ping:
-                    //if (ping.Content == "rs:0")
-                    //{
-                    //    _isInitialCommentsReceiving = true;
-                    //}
-                    //else if (ping.Content == "rf:0")
-                    //{
-                    //    _isInitialCommentsReceiving = false;
-                    //}
-                    break;
-                case Chat.UnknownMessage unknown:
-                    _logger.LogException(new ParseException(unknown.Raw));
-                    break;
-                default:
-                    break;
-            }
-        }
-        private async void ChatProvider_Received(object sender, Chat.IChatMessage e)
-        {
-            var message = e;
-            try
-            {
-                await ProcessChatMessageAsync(message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogException(ex);
-            }
-
-        }
 
         readonly List<Task> _tasks = new List<Task>();
         readonly List<Task> _toAdd = new List<Task>();
         TaskCompletionSource<object> _mainLooptcs;
-        private readonly Chat.ChatProvider _chatProvider;
-        Metadata.Room _room;
         DataProps _dataProps;
         private bool _disposedValue;
         private int _PackedServerConnectionCount = 0;
@@ -601,31 +342,7 @@ namespace NicoSitePlugin
             {
                 switch (message)
                 {
-                    case Metadata.Room room:
-                        {
-                            _room = room;
-                            Chat.IChatOptions chatOptions;
-                            if (Metadata.Room.IsLoggedIn(room))
-                            {
-                                chatOptions = new Chat.ChatLoggedInOptions
-                                {
-                                    Thread = room.ThreadId,
-                                    ThreadKey = room.YourPostKey,
-                                    UserId = _dataProps.UserId,
-                                };
-                            }
-                            else
-                            {
-                                chatOptions = new Chat.ChatGuestOptions
-                                {
-                                    Thread = room.ThreadId,
-                                    UserId = "guest",
-                                };
-                            }
-                            var t = _chatProvider.ReceiveAsync(chatOptions);
-                            _toAdd.Add(t);
-                            _mainLooptcs.SetResult(null);
-                        }
+                    case Metadata.Room _:
                         break;
                     case Metadata.Ping ping:
                         _metaProvider?.Send(new Metadata.Pong());
@@ -663,6 +380,7 @@ namespace NicoSitePlugin
                         _PackedServerConnectionCount = 0;
                         _PreviousServerConnectionCount = 0;
                         _toAdd.Add(task);
+                        _mainLooptcs.SetResult(null);
                         break;
                     case Metadata.ErrorMessage errorMessage:
                         if (errorMessage.reason == "COMMENT_POST_NOT_ALLOWED")
@@ -866,7 +584,10 @@ namespace NicoSitePlugin
             {
                 var notification = message.Message?.SimpleNotificationV2;
                 //info
-                if (notification.Type == NotificationType.ProgramExtended)
+                if (!ShouldReceiveNotification(notification.Type))
+                {
+                }
+                else if (notification.Type == NotificationType.ProgramExtended)
                 {
                     var contents = notification.Message;
 
@@ -1044,7 +765,7 @@ namespace NicoSitePlugin
                     RaiseMessageReceived(context);
                 }
             }
-            if(message.Message?.Gift != null)
+            if(_siteOptions.IsReceiveGift && message.Message?.Gift != null)
             {
                 var date = Now();
                 if (message.Meta?.At != null)
@@ -1105,7 +826,7 @@ namespace NicoSitePlugin
                 var context = new NicoMessageContext(comment, metadata, new NicoMessageMethods());
                 RaiseMessageReceived(context);
             }
-            if (message.Message?.Nicoad != null)
+            if (_siteOptions.IsReceiveNicoad && message.Message?.Nicoad != null)
             {
                 var adv1 = message.Message.Nicoad.V1;
                 if (adv1 != null)
@@ -1138,7 +859,7 @@ namespace NicoSitePlugin
             if(message.State != null)
             {
                 var announce = message.State?.Marquee?.Display?.OperatorComment; //放送者コメント
-                if(announce != null)
+                if(_siteOptions.IsReceiveOperatorComment && announce != null)
                 {
                     var contents = announce.Content;
                     if (announce.Link != null && announce.Link != "")
@@ -1159,7 +880,7 @@ namespace NicoSitePlugin
                     RaiseMessageReceived(context);
                 }
 
-                if (message.State.Enquete != null)
+                if (_siteOptions.IsReceiveVote && message.State.Enquete != null)
                 {
                     if(message.State.Enquete?.Question == null||message.State.Enquete?.Question == "")
                     {
@@ -1329,6 +1050,31 @@ namespace NicoSitePlugin
             await Task.CompletedTask;
         }
 
+        private bool ShouldReceiveNotification(NotificationType type)
+        {
+            switch (type)
+            {
+                case NotificationType.ProgramExtended:
+                    return _siteOptions.IsReceiveProgramExtended;
+                case NotificationType.Ichiba:
+                    return _siteOptions.IsReceiveIchiba;
+                case NotificationType.RankingIn:
+                    return _siteOptions.IsReceiveRankingIn;
+                case NotificationType.Visited:
+                    return _siteOptions.IsReceiveVisited;
+                case NotificationType.Cruise:
+                    return _siteOptions.IsReceiveCruise;
+                case NotificationType.Emotion:
+                    return _siteOptions.IsReceiveEmotion;
+                case NotificationType.SupporterRegistered:
+                    return _siteOptions.IsReceiveSupporterRegistered;
+                case NotificationType.UserLevelUp:
+                    return _siteOptions.IsReceiveUserLevelUp;
+                default:
+                    return true;
+            }
+        }
+
         private readonly SynchronizedCollection<string> _receivedCommentIds = new SynchronizedCollection<string>();
         private bool IsDuplicate(string id)
         {
@@ -1396,7 +1142,6 @@ namespace NicoSitePlugin
             _isDisconnectedExpected = true;
             _disconnectCts.Cancel();
             _metaProvider?.Disconnect();
-            _chatProvider?.Disconnect();
             _messageServerClient?.disconnect();
             _messageServerClient = null;
             //_receivedCommentIds.Clear();//メモリリークするけど...
@@ -1483,8 +1228,6 @@ namespace NicoSitePlugin
             _server = server;
             _metaProvider = new Metadata.MetaProvider(_logger);
             _metaProvider.Received += MetaProvider_Received;
-            _chatProvider = new Chat.ChatProvider(_logger);
-            _chatProvider.Received += ChatProvider_Received;
         }
 
         protected virtual void Dispose(bool disposing)
@@ -1495,7 +1238,6 @@ namespace NicoSitePlugin
                 {
                     // TODO: dispose managed state (managed objects)
                     _metaProvider.Received -= MetaProvider_Received;
-                    _chatProvider.Received -= ChatProvider_Received;
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer

@@ -76,6 +76,66 @@ namespace NicoSitePlugin
             get => ChangedOptions.EmotionForeColor;
             set => ChangedOptions.EmotionForeColor = value;
         }
+        public bool IsReceiveProgramExtended
+        {
+            get => ChangedOptions.IsReceiveProgramExtended;
+            set => ChangedOptions.IsReceiveProgramExtended = value;
+        }
+        public bool IsReceiveIchiba
+        {
+            get => ChangedOptions.IsReceiveIchiba;
+            set => ChangedOptions.IsReceiveIchiba = value;
+        }
+        public bool IsReceiveRankingIn
+        {
+            get => ChangedOptions.IsReceiveRankingIn;
+            set => ChangedOptions.IsReceiveRankingIn = value;
+        }
+        public bool IsReceiveVisited
+        {
+            get => ChangedOptions.IsReceiveVisited;
+            set => ChangedOptions.IsReceiveVisited = value;
+        }
+        public bool IsReceiveCruise
+        {
+            get => ChangedOptions.IsReceiveCruise;
+            set => ChangedOptions.IsReceiveCruise = value;
+        }
+        public bool IsReceiveEmotion
+        {
+            get => ChangedOptions.IsReceiveEmotion;
+            set => ChangedOptions.IsReceiveEmotion = value;
+        }
+        public bool IsReceiveSupporterRegistered
+        {
+            get => ChangedOptions.IsReceiveSupporterRegistered;
+            set => ChangedOptions.IsReceiveSupporterRegistered = value;
+        }
+        public bool IsReceiveUserLevelUp
+        {
+            get => ChangedOptions.IsReceiveUserLevelUp;
+            set => ChangedOptions.IsReceiveUserLevelUp = value;
+        }
+        public bool IsReceiveGift
+        {
+            get => ChangedOptions.IsReceiveGift;
+            set => ChangedOptions.IsReceiveGift = value;
+        }
+        public bool IsReceiveNicoad
+        {
+            get => ChangedOptions.IsReceiveNicoad;
+            set => ChangedOptions.IsReceiveNicoad = value;
+        }
+        public bool IsReceiveOperatorComment
+        {
+            get => ChangedOptions.IsReceiveOperatorComment;
+            set => ChangedOptions.IsReceiveOperatorComment = value;
+        }
+        public bool IsReceiveVote
+        {
+            get => ChangedOptions.IsReceiveVote;
+            set => ChangedOptions.IsReceiveVote = value;
+        }
         private readonly NicoSiteOptions _origin;
         private readonly NicoSiteOptions _changed;
         internal NicoSiteOptions OriginOptions { get { return _origin; } }

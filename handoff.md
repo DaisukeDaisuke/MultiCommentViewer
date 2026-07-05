@@ -9,3 +9,10 @@
 - Twitch Notice/USERNOTICE は SubscriptionNoticeBackColor/SubscriptionNoticeForeColor で表示する。サブスク判定が外れても黄色に戻らないよう、旧 NoticeBackColor/NoticeForeColor は表示経路では使わない。既定は紫背景 #FF5E35B1、白文字。
 - USERNOTICE に userMessage がある場合は system-msg だけを TwitchNotice として先に表示し、userMessage は後続の TwitchComment として流す。これによりユーザーメッセージ部分は通常コメント扱いになり、BouyomiPlugin の新規タイプ追加は不要。
 - Twitch USERNOTICE は設定で全停止、既知 msg-id ごとの受信、その他の受信を切り替えられる。判定は受信時に _siteOptions を読むため、適用済み設定は再接続なしで次の USERNOTICE から反映される。
+
+2026-07-05
+
+- NicoSitePlugin2 の IsShow184Id 既定値を true、IsAutoGetUsername 既定値を false に変更した。保存済み設定に値がある場合は DynamicOptionsBase.Deserialize が保存値を優先する。
+- NicoSitePlugin2 に ProgramExtended/Ichiba/RankingIn/Visited/Cruise/Emotion/SupporterRegistered/UserLevelUp/Gift/Nicoad/OperatorComment/Vote の受信可否設定を追加した。既定値は既存挙動維持のためすべて true。
+- 受信可否は TestCommentProvider.ProcessChunkedMessage 内で _siteOptions を都度参照するため、設定反映後は再接続なしで次の受信から効く。
+- 旧 ChatProvider 経由の WebSocket 二重接続処理を TestCommentProvider から外した。現行 MessageServer/SegmentServer/PackedSegmentClient 経路は維持し、Metadata.MessageServer 受信時に現行ストリームタスクをメインループへ反映する。

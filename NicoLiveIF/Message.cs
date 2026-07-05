@@ -123,5 +123,17 @@ namespace NicoSitePlugin
 
         bool IsShow184Id { get; set; }
         bool IsAutoGetUsername { get; set; }
+        bool IsReceiveProgramExtended { get; }
+        bool IsReceiveIchiba { get; }
+        bool IsReceiveRankingIn { get; }
+        bool IsReceiveVisited { get; }
+        bool IsReceiveCruise { get; }
+        bool IsReceiveEmotion { get; }
+        bool IsReceiveSupporterRegistered { get; }
+        bool IsReceiveUserLevelUp { get; }
+        bool IsReceiveGift { get; }
+        bool IsReceiveNicoad { get; }
+        bool IsReceiveOperatorComment { get; }
+        bool IsReceiveVote { get; }
     }
 }

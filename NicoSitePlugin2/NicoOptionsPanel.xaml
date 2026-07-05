@@ -6,8 +6,10 @@
              xmlns:local="clr-namespace:NicoSitePlugin"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              d:DataContext="{d:DesignInstance local:NicoSiteOptionsViewModel, IsDesignTimeCreatable=True}"
-             mc:Ignorable="d" Height="360" Width="405">
+             mc:Ignorable="d" Width="405">
     <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <Grid Height="610">
         <TextBox HorizontalAlignment="Left" Height="23" Margin="169,30,0,0" TextWrapping="Wrap" Text="{Binding OfficialRoomsRetrieveCount}" VerticalAlignment="Top" Width="51"/>
         <Label Content="公式放送で取得する部屋数" HorizontalAlignment="Left" Margin="17,27,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.132,-0.192"/>
         <CheckBox Content="184コメントを表示する" IsChecked="{Binding IsShow184}" HorizontalAlignment="Left" Margin="30,98,0,0" VerticalAlignment="Top"/>
@@ -15,20 +17,41 @@
         <CheckBox Content="184IDをユーザ名として表示する" IsChecked="{Binding IsShow184Id}" HorizontalAlignment="Left" Margin="30,128,0,0" VerticalAlignment="Top"/>
         <CheckBox Content="ユーザ名を自動的に取得する" IsChecked="{Binding IsAutoGetUsername}" HorizontalAlignment="Left" Margin="30,148,0,0" VerticalAlignment="Top"/>
 
-        <Label Content="広告背景色" HorizontalAlignment="Left" Margin="20,181,0,0" VerticalAlignment="Top" />
-        <xctk:ColorPicker SelectedColor="{Binding AdBackColor}" Margin="123,185,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" />
-        <Label Content="広告文字色" HorizontalAlignment="Left" Margin="212,185,0,0" VerticalAlignment="Top" />
-        <xctk:ColorPicker SelectedColor="{Binding AdForeColor}" Margin="315,185,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" />
+        <GroupBox Header="受信する通知" Margin="10,174,10,0" Height="126" VerticalAlignment="Top">
+            <WrapPanel Margin="6,4,0,0">
+                <CheckBox Content="番組延長" IsChecked="{Binding IsReceiveProgramExtended}" Width="92" Margin="0,0,0,8"/>
+                <CheckBox Content="市場" IsChecked="{Binding IsReceiveIchiba}" Width="92" Margin="0,0,0,8"/>
+                <CheckBox Content="ランキング入り" IsChecked="{Binding IsReceiveRankingIn}" Width="118" Margin="0,0,0,8"/>
+                <CheckBox Content="来場" IsChecked="{Binding IsReceiveVisited}" Width="74" Margin="0,0,0,8"/>
+                <CheckBox Content="クルーズ" IsChecked="{Binding IsReceiveCruise}" Width="92" Margin="0,0,0,8"/>
+                <CheckBox Content="エモーション" IsChecked="{Binding IsReceiveEmotion}" Width="104" Margin="0,0,0,8"/>
+                <CheckBox Content="サポーター登録" IsChecked="{Binding IsReceiveSupporterRegistered}" Width="126" Margin="0,0,0,8"/>
+                <CheckBox Content="ユーザーレベルアップ" IsChecked="{Binding IsReceiveUserLevelUp}" Width="154" Margin="0,0,0,8"/>
+            </WrapPanel>
+        </GroupBox>
+        <GroupBox Header="受信する通知" Margin="10,316,10,0" Height="80" VerticalAlignment="Top">
+            <WrapPanel Margin="6,4,0,0">
+                <CheckBox Content="ギフト" IsChecked="{Binding IsReceiveGift}" Width="82" Margin="0,0,0,8"/>
+                <CheckBox Content="ニコニ広告" IsChecked="{Binding IsReceiveNicoad}" Width="96" Margin="0,0,0,8"/>
+                <CheckBox Content="運営/放送者コメント" IsChecked="{Binding IsReceiveOperatorComment}" Width="150" Margin="0,0,0,8"/>
+                <CheckBox Content="投票" IsChecked="{Binding IsReceiveVote}" Width="74" Margin="0,0,0,8"/>
+            </WrapPanel>
+        </GroupBox>
 
-        <Label Content="アイテム背景色" HorizontalAlignment="Left" Margin="20,208,0,0" VerticalAlignment="Top" />
-        <xctk:ColorPicker SelectedColor="{Binding ItemBackColor}" Margin="123,212,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" />
-        <Label Content="アイテム文字色" HorizontalAlignment="Left" Margin="212,212,0,0" VerticalAlignment="Top" />
-        <xctk:ColorPicker SelectedColor="{Binding ItemForeColor}" Margin="315,212,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" />
-        <Label Content="リクエスト背景色" HorizontalAlignment="Left" Margin="20,235,0,0" VerticalAlignment="Top" />
-        <xctk:ColorPicker SelectedColor="{Binding SpiBackColor}" Margin="123,239,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" />
-        <Label Content="リクエスト文字色" HorizontalAlignment="Left" Margin="212,239,0,0" VerticalAlignment="Top" />
-        <xctk:ColorPicker SelectedColor="{Binding SpiForeColor}" Margin="315,239,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" />
-        <GroupBox Margin="10,265,0,40">
+        <Label Content="広告背景色" HorizontalAlignment="Left" Margin="20,413,0,0" VerticalAlignment="Top" />
+        <xctk:ColorPicker SelectedColor="{Binding AdBackColor}" Margin="123,417,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" />
+        <Label Content="広告文字色" HorizontalAlignment="Left" Margin="212,417,0,0" VerticalAlignment="Top" />
+        <xctk:ColorPicker SelectedColor="{Binding AdForeColor}" Margin="315,417,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" />
+
+        <Label Content="アイテム背景色" HorizontalAlignment="Left" Margin="20,440,0,0" VerticalAlignment="Top" />
+        <xctk:ColorPicker SelectedColor="{Binding ItemBackColor}" Margin="123,444,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" />
+        <Label Content="アイテム文字色" HorizontalAlignment="Left" Margin="212,444,0,0" VerticalAlignment="Top" />
+        <xctk:ColorPicker SelectedColor="{Binding ItemForeColor}" Margin="315,444,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" />
+        <Label Content="リクエスト背景色" HorizontalAlignment="Left" Margin="20,467,0,0" VerticalAlignment="Top" />
+        <xctk:ColorPicker SelectedColor="{Binding SpiBackColor}" Margin="123,471,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" />
+        <Label Content="リクエスト文字色" HorizontalAlignment="Left" Margin="212,471,0,0" VerticalAlignment="Top" />
+        <xctk:ColorPicker SelectedColor="{Binding SpiForeColor}" Margin="315,471,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" />
+        <GroupBox Margin="10,497,0,40">
             <GroupBox.Header>
                 <CheckBox x:Name="checkBoxIsShowEmotion" Content="エモーションを表示" IsChecked="{Binding IsShowEmotion}" HorizontalAlignment="Left"  VerticalAlignment="Top"/>
             </GroupBox.Header>
@@ -49,5 +72,7 @@
 
 
 
+            </Grid>
+        </ScrollViewer>
     </Grid>
 </UserControl>
