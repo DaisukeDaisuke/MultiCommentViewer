@@ -380,7 +380,6 @@ namespace NicoSitePlugin
                         _PackedServerConnectionCount = 0;
                         _PreviousServerConnectionCount = 0;
                         _toAdd.Add(task);
-                        _mainLooptcs.SetResult(null);
                         break;
                     case Metadata.ErrorMessage errorMessage:
                         if (errorMessage.reason == "COMMENT_POST_NOT_ALLOWED")

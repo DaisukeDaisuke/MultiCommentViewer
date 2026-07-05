@@ -19,8 +19,8 @@
 
         <GroupBox Header="受信する通知" Margin="10,174,10,0" Height="126" VerticalAlignment="Top">
             <WrapPanel Margin="6,4,0,0">
-                <CheckBox Content="番組延長" IsChecked="{Binding IsReceiveProgramExtended}" Width="92" Margin="0,0,0,8"/>
-                <CheckBox Content="市場" IsChecked="{Binding IsReceiveIchiba}" Width="92" Margin="0,0,0,8"/>
+                <CheckBox Content="通常告知" IsChecked="{Binding IsReceiveProgramExtended}" Width="92" Margin="0,0,0,8"/>
+                <CheckBox Content="ニコゲー etc" IsChecked="{Binding IsReceiveIchiba}" Width="92" Margin="0,0,0,8"/>
                 <CheckBox Content="ランキング入り" IsChecked="{Binding IsReceiveRankingIn}" Width="118" Margin="0,0,0,8"/>
                 <CheckBox Content="来場" IsChecked="{Binding IsReceiveVisited}" Width="74" Margin="0,0,0,8"/>
                 <CheckBox Content="クルーズ" IsChecked="{Binding IsReceiveCruise}" Width="92" Margin="0,0,0,8"/>

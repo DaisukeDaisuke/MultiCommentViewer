@@ -15,4 +15,4 @@
 - NicoSitePlugin2 の IsShow184Id 既定値を true、IsAutoGetUsername 既定値を false に変更した。保存済み設定に値がある場合は DynamicOptionsBase.Deserialize が保存値を優先する。
 - NicoSitePlugin2 に ProgramExtended/Ichiba/RankingIn/Visited/Cruise/Emotion/SupporterRegistered/UserLevelUp/Gift/Nicoad/OperatorComment/Vote の受信可否設定を追加した。既定値は既存挙動維持のためすべて true。
 - 受信可否は TestCommentProvider.ProcessChunkedMessage 内で _siteOptions を都度参照するため、設定反映後は再接続なしで次の受信から効く。
-- 旧 ChatProvider 経由の WebSocket 二重接続処理を TestCommentProvider から外した。現行 MessageServer/SegmentServer/PackedSegmentClient 経路は維持し、Metadata.MessageServer 受信時に現行ストリームタスクをメインループへ反映する。
+- 旧 ChatProvider 経由の WebSocket 二重接続処理を TestCommentProvider から外した。現行 MessageServer/SegmentServer/PackedSegmentClient 経路は維持し、メインループ起床は従来通り Room メタ情報受信側で行う。
