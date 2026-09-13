@@ -56,14 +56,14 @@ namespace YouTubeLiveSitePlugin
         //    };
         //    PostedAt = SitePluginCommon.Utils.UnixtimeToDateTime(comment.TimestampUsec / (1000 * 1000));
         //}
-        public YouTubeLiveMembership(MemberShip text) : base("")
+        public YouTubeLiveMembership(MemberShip text, bool isHideMembershipIcon = false) : base("")
         {
             UserId = text.AuthorExternalChannelId;
             Id = text.Id;
             CommentItems = MessageBase.Convert(text.MessageItems);
             HeaderPrimaryTextItems = MessageBase.Convert(text.HeaderPrimaryTextItems);
             HeaderSubTextItems = MessageBase.Convert(text.HeaderSubTextItems);
-            NameItems = MessageBase.Convert(text.AuthorName, text.AuthorBadges);
+            NameItems = MessageBase.Convert(text.AuthorName, text.AuthorBadges, isHideMembershipIcon);
             UserIcon = MessageBase.Convert(text.AuthorPhoto);
             PostedAt = MessageBase.Convert(text.TimestampUsec);
 
@@ -82,12 +82,12 @@ namespace YouTubeLiveSitePlugin
         public IMessageImage UserIcon { get; set; }
         public string PurchaseAmount { get; }
 
-        public YouTubeLiveSuperchat(SuperChat text) : base("")
+        public YouTubeLiveSuperchat(SuperChat text, bool isHideMembershipIcon = false) : base("")
         {
             UserId = text.AuthorExternalChannelId;
             Id = text.Id;
             CommentItems = MessageBase.Convert(text.MessageItems);
-            NameItems = MessageBase.Convert(text.AuthorName, text.AuthorBadges);
+            NameItems = MessageBase.Convert(text.AuthorName, text.AuthorBadges, isHideMembershipIcon);
             UserIcon = MessageBase.Convert(text.AuthorPhoto);
             PostedAt = MessageBase.Convert(text.TimestampUsec);
             PurchaseAmount = text.PurchaseAmount;
@@ -110,12 +110,12 @@ namespace YouTubeLiveSitePlugin
         public int StickerHeight { get; }
         public string StickerTooltip { get; }
 
-        public YouTubeLivePaidSticker(PaidSticker text) : base("")
+        public YouTubeLivePaidSticker(PaidSticker text, bool isHideMembershipIcon = false) : base("")
         {
             UserId = text.ChannelId;
             Id = text.Id;
             //CommentItems = MessageBase.Convert(text.MessageItems);
-            NameItems = MessageBase.Convert(text.AuthorName, text.AuthorBadges);
+            NameItems = MessageBase.Convert(text.AuthorName, text.AuthorBadges, isHideMembershipIcon);
             UserIcon = MessageBase.Convert(text.AuthorPhoto);
             PostedAt = MessageBase.Convert(text.TimestampUsec);
             PurchaseAmount = text.PurchaseAmount;
@@ -136,12 +136,12 @@ namespace YouTubeLiveSitePlugin
         public DateTime PostedAt { get; set; }
         public IMessageImage UserIcon { get; set; }
 
-        public YouTubeLiveSponsorshipsGiftPurchaseAnnouncement(SponsorshipsGiftPurchaseAnnouncement text) : base("")
+        public YouTubeLiveSponsorshipsGiftPurchaseAnnouncement(SponsorshipsGiftPurchaseAnnouncement text, bool isHideMembershipIcon = false) : base("")
         {
             UserId = text.ChannelId;
             Id = text.Id;
             MessageItems = MessageBase.Convert(text.HeaderPrimaryText);
-            NameItems = MessageBase.Convert(text.AuthorName, text.AuthorBadges);
+            NameItems = MessageBase.Convert(text.AuthorName, text.AuthorBadges, isHideMembershipIcon);
             UserIcon = MessageBase.Convert(text.AuthorPhoto);
             PostedAt = MessageBase.Convert(text.TimestampUsec);
         }
@@ -159,12 +159,12 @@ namespace YouTubeLiveSitePlugin
         public DateTime PostedAt { get; set; }
         public IMessageImage UserIcon { get; set; }
 
-        public YouTubeLiveComment(TextMessage text) : base("")
+        public YouTubeLiveComment(TextMessage text, bool isHideMembershipIcon = false) : base("")
         {
             UserId = text.AuthorExternalChannelId;
             Id = text.Id;
             CommentItems = MessageBase.Convert(text.MessageItems);
-            NameItems = MessageBase.Convert(text.AuthorName, text.AuthorBadges);
+            NameItems = MessageBase.Convert(text.AuthorName, text.AuthorBadges, isHideMembershipIcon);
             UserIcon = MessageBase.Convert(text.AuthorPhoto);
             PostedAt = MessageBase.Convert(text.TimestampUsec);
         }
@@ -189,7 +189,7 @@ namespace YouTubeLiveSitePlugin
         {
             return items.Select(a => MessageConverter.Parse(a)).ToList();
         }
-        public static IEnumerable<IMessagePart> Convert(string? authorName, List<IAuthorBadge> authorBadges)
+        public static IEnumerable<IMessagePart> Convert(string? authorName, List<IAuthorBadge> authorBadges, bool isHideMembershipIcon = false)
         {
             var nameItems = new List<IMessagePart>();
             if (authorName != null)
@@ -199,6 +199,11 @@ namespace YouTubeLiveSitePlugin
             var badges = new List<IMessagePart>();
             foreach (var badge in authorBadges)
             {
+                if (isHideMembershipIcon &&
+                    (badge is AuthorBadgeCustomThumb || badge is AuthorBadgeCustomThumbWithSize))
+                {
+                    continue;
+                }
                 var parsed = MessageConverter.Parse(badge);
                 if (parsed == null) continue;
                 badges.Add(parsed);

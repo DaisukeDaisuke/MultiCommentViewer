@@ -841,7 +841,7 @@ namespace YouTubeLiveSitePlugin.Next
             IEnumerable<SitePlugin.IMessagePart> commentItems;
             IEnumerable<SitePlugin.IMessagePart> nameItems;
 
-            var a = new YouTubeLiveComment(text);
+            var a = new YouTubeLiveComment(text, _siteOptions.IsHideMembershipIcon);
             message = a;
             nameItems = a.NameItems;
             commentItems = a.CommentItems;
@@ -867,7 +867,7 @@ namespace YouTubeLiveSitePlugin.Next
             IEnumerable<SitePlugin.IMessagePart> commentItems;
             IEnumerable<SitePlugin.IMessagePart> nameItems;
 
-            var a = new YouTubeLiveSuperchat(text);
+            var a = new YouTubeLiveSuperchat(text, _siteOptions.IsHideMembershipIcon);
             message = a;
             nameItems = a.NameItems;
             commentItems = a.CommentItems;
@@ -891,7 +891,7 @@ namespace YouTubeLiveSitePlugin.Next
         {
             //IYouTubeLiveMessage message;
 
-            var message = new YouTubeLivePaidSticker(text);
+            var message = new YouTubeLivePaidSticker(text, _siteOptions.IsHideMembershipIcon);
             //message = a;
 
             var metadata = CreateMetadata(message, isInitialComment);
@@ -902,7 +902,7 @@ namespace YouTubeLiveSitePlugin.Next
         }
         private YouTubeLiveMessageContext CreateMessageContext2(SponsorshipsGiftPurchaseAnnouncement text, bool isInitialComment)
         {
-            var message = new YouTubeLiveSponsorshipsGiftPurchaseAnnouncement(text);
+            var message = new YouTubeLiveSponsorshipsGiftPurchaseAnnouncement(text, _siteOptions.IsHideMembershipIcon);
 
             var metadata = CreateMetadata(message, isInitialComment);
             var methods = new YouTubeLiveMessageMethods();
@@ -912,7 +912,7 @@ namespace YouTubeLiveSitePlugin.Next
         }
         private YouTubeLiveMessageContext CreateMessageContext2(MemberShip text, bool isInitialComment)
         {
-            var message = new YouTubeLiveMembership(text);
+            var message = new YouTubeLiveMembership(text, _siteOptions.IsHideMembershipIcon);
 
             var metadata = CreateMetadata(message, isInitialComment);
             var methods = new YouTubeLiveMessageMethods();

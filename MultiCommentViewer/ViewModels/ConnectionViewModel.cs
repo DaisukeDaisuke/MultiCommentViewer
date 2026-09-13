@@ -8,10 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Security.Policy;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -61,7 +57,6 @@ namespace MultiCommentViewer
         private readonly ConnectionName _connectionName;
         public ICommand ConnectCommand { get; }
         public ICommand DisconnectCommand { get; }
-        public ICommand LoginCommand { get; }
 
         public event EventHandler<SelectedSiteChangedEventArgs> SelectedSiteChanged;
 
@@ -127,27 +122,6 @@ namespace MultiCommentViewer
                     NewValue = _currentContext
                 });
 
-                CanLogin = IsLoginEnabled(this.SelectedSite);
-            }
-        }
-
-        private bool IsLoginEnabled(SiteViewModel connectionName)
-        {
-            var site = GetLoginUrlForSite(connectionName.DisplayName);
-            return !string.IsNullOrEmpty(site);
-        }
-
-        private bool _canLogin;
-        public bool CanLogin
-        {
-            get => _canLogin;
-            set
-            {
-                if (_canLogin != value)
-                {
-                    _canLogin = value;
-                    RaisePropertyChanged(nameof(CanLogin)); // ← ここで通知
-                }
             }
         }
 
@@ -363,7 +337,6 @@ namespace MultiCommentViewer
             {
                 //接続中は削除できないように選択を外す
                 IsSelected = false;
-                CanLogin = false;
                 var input = Input;
                 var browser = SelectedBrowser.Browser;
                 await _commentProvider.ConnectAsync(input, browser);
@@ -381,7 +354,6 @@ namespace MultiCommentViewer
             try
             {
                 _commentProvider.Disconnect();
-                CanLogin = IsLoginEnabled(this.SelectedSite);
             }
             catch (Exception ex)
             {
@@ -460,67 +432,6 @@ namespace MultiCommentViewer
             }
             ConnectCommand = new RelayCommand(Connect);
             DisconnectCommand = new RelayCommand(Disconnect);
-            LoginCommand = new RelayCommand(async () => await ExecuteLoginCommandAsync());
-        }
-
-        private async Task ExecuteLoginCommandAsync()
-        {
-            try
-            {
-                var site = SelectedSite.DisplayName;
-                var loginUrl = GetLoginUrlForSite(site);
-                if (string.IsNullOrEmpty(loginUrl))
-                {
-                    MessageBox.Show("エラー: 押せないはずのボタン！");
-                    return;
-                }
-
-                _dispatcher.Invoke(() =>
-                {
-                    CanLogin = false;
-                });
-
-                //var loginWindow = new LoginWindow(site, loginUrl);
-                //loginWindow.Owner = Application.Current.MainWindow;
-
-                // ShowDialog() の代わりに Show() を使用
-                //loginWindow.Show();
-
-                // 非同期でログイン完了を待つ
-                //var result = await loginWindow.WaitForCompletionAsync();
-
-                //if (result.IsCompleted)
-                //{
-                //    MessageBox.Show("ログインデーターの取得が完了しました。ブラウザを「buildin(default)」にして、コメビュを再起動してください", "情報",
-                //        MessageBoxButton.OK, MessageBoxImage.Information);
-
-                //    UpdateLoggedInInfo();
-                //}
-                //else if (!string.IsNullOrEmpty(result.ErrorMessage))
-                //{
-                //    MessageBox.Show($"ログインエラー: {result.ErrorMessage}", "エラー",
-                //        MessageBoxButton.OK, MessageBoxImage.Error);
-                //}
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"ログイン処理中にエラーが発生しました: {ex.Message}", "エラー",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            _dispatcher.Invoke(() =>
-            {
-                CanLogin = true;
-            });
-        }
-        // サイト別のログインURL取得
-        private string GetLoginUrlForSite(string site)
-        {
-            return site switch
-            {
-                "Mirrativ" => "www.mirrativ.com", // Mirrativ.bin
-                "YouTubeLive" => "www.youtube.com/@rabikemono/playlists", // YouTubeLive.bin
-                _ => null
-            } is string domain ? "https://" + domain : null;
         }
     }
     public class RenamedEventArgs : EventArgs

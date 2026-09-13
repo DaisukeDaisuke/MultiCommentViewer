@@ -14,6 +14,7 @@ namespace YouTubeLiveSitePlugin.Test2
         Color MembershipForeColor { get; set; }
         bool IsAutoSetNickname { get; set; }
         bool IsAllChat { get; set; }
+        bool IsHideMembershipIcon { get; set; }
     }
     internal class YouTubeLiveSiteOptions : DynamicOptionsBase, IYouTubeLiveSiteOptions
     {
@@ -23,6 +24,7 @@ namespace YouTubeLiveSitePlugin.Test2
         public Color MembershipForeColor { get => GetValue(); set => SetValue(value); }
         public bool IsAutoSetNickname { get => GetValue(); set => SetValue(value); }
         public bool IsAllChat { get => GetValue(); set => SetValue(value); }
+        public bool IsHideMembershipIcon { get => GetValue(); set => SetValue(value); }
 
         protected override void Init()
         {
@@ -32,6 +34,7 @@ namespace YouTubeLiveSitePlugin.Test2
             Dict.Add(nameof(MembershipForeColor), new Item { DefaultValue = ColorFromArgb("#FFFFFFFF"), Predicate = c => true, Serializer = c => ColorToArgb(c), Deserializer = s => ColorFromArgb(s) });
             Dict.Add(nameof(IsAutoSetNickname), new Item { DefaultValue = false, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
             Dict.Add(nameof(IsAllChat), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
+            Dict.Add(nameof(IsHideMembershipIcon), new Item { DefaultValue = false, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
         }
         internal YouTubeLiveSiteOptions Clone()
         {

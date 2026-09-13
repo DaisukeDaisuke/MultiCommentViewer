@@ -46,6 +46,11 @@ namespace YouTubeLiveSitePlugin.Test2
             get => ChangedOptions.IsAllChat;
             set => ChangedOptions.IsAllChat = value;
         }
+        public bool IsHideMembershipIcon
+        {
+            get => ChangedOptions.IsHideMembershipIcon;
+            set => ChangedOptions.IsHideMembershipIcon = value;
+        }
         private readonly YouTubeLiveSiteOptions _origin;
         private readonly YouTubeLiveSiteOptions changed;
         internal YouTubeLiveSiteOptions OriginOptions { get { return _origin; } }
