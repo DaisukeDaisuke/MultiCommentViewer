@@ -54,6 +54,8 @@
             Margin="5"
             Grid.Row="5"
             ScrollViewer.ScrollChanged="DataGridScrollChanged"
+            Loaded="DataGrid_Loaded"
+            ColumnReordered="DataGrid_ColumnReordered"
             >
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="{Binding SelectedRowBackColor}"/>
@@ -104,7 +106,6 @@
             </DataGrid.Resources>
             <DataGrid.Columns>
                 <DataGridTemplateColumn Header="接続名" 
-                                            DisplayIndex="{Binding DataContext.ConnectionNameDisplayIndex, Mode=TwoWay, Source={x:Reference dummyElement}, FallbackValue=0}"
                                             Width="{Binding DataContext.ConnectionNameWidth, Mode=TwoWay, Source={x:Reference dummyElement}, Converter={StaticResource dataGridLengthConverter}}"
                                             Visibility="{Binding DataContext.IsShowConnectionName, Source={x:Reference dummyElement}, Converter={StaticResource booleanToVisibilityConverter}}">
                     <DataGridTemplateColumn.CellTemplate>
@@ -114,7 +115,6 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="ｻﾑﾈ" 
-                                            DisplayIndex="{Binding DataContext.ThumbnailDisplayIndex, Mode=TwoWay, Source={x:Reference dummyElement}, FallbackValue=1}"
                                             Width="{Binding DataContext.ThumbnailWidth, Mode=TwoWay, Source={x:Reference dummyElement}, Converter={StaticResource dataGridLengthConverter}}"
                                             Visibility="{Binding DataContext.IsShowThumbnail, Source={x:Reference dummyElement}, Converter={StaticResource booleanToVisibilityConverter}}">
                     <DataGridTemplateColumn.CellTemplate>
@@ -124,7 +124,6 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="コメントID"
-                                        DisplayIndex="{Binding DataContext.CommentIdDisplayIndex, Mode=TwoWay, Source={x:Reference dummyElement}, FallbackValue=2}"
                                         Visibility="{Binding DataContext.IsShowCommentId, Source={x:Reference dummyElement}, Converter={StaticResource booleanToVisibilityConverter}}"
                                         Width="{Binding DataContext.CommentIdWidth, Mode=TwoWay, Source={x:Reference dummyElement}, Converter={StaticResource dataGridLengthConverter}}"
                                         >
@@ -135,7 +134,6 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="ユーザ名" 
-                                            DisplayIndex="{Binding DataContext.UsernameDisplayIndex, Mode=TwoWay, Source={x:Reference dummyElement}, FallbackValue=3}"
                                             Visibility="{Binding DataContext.IsShowUsername, Source={x:Reference dummyElement}, Converter={StaticResource booleanToVisibilityConverter}}"
                                             Width="{Binding DataContext.UsernameWidth, Mode=TwoWay, Source={x:Reference dummyElement}, Converter={StaticResource dataGridLengthConverter}}"
                                             >
@@ -147,7 +145,6 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="コメント"
-                                            DisplayIndex="{Binding DataContext.MessageDisplayIndex, Mode=TwoWay, Source={x:Reference dummyElement}, FallbackValue=4}"
                                             Visibility="Visible"
                                             Width="{Binding DataContext.MessageWidth, Mode=TwoWay, Source={x:Reference dummyElement}, Converter={StaticResource dataGridLengthConverter}}"
                                             >
@@ -159,7 +156,6 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="投稿時間" 
-                                            DisplayIndex="{Binding DataContext.PostTimeDisplayIndex, Mode=TwoWay, Source={x:Reference dummyElement}, FallbackValue=5}"
                                             Width="{Binding DataContext.PostTimeWidth, Mode=TwoWay, Source={x:Reference dummyElement}, Converter={StaticResource dataGridLengthConverter}}"
                                             Visibility="{Binding DataContext.IsShowPostTime, Source={x:Reference dummyElement}, Converter={StaticResource booleanToVisibilityConverter}}">
                     <DataGridTemplateColumn.CellTemplate>
@@ -169,7 +165,6 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="情報" 
-                                            DisplayIndex="{Binding DataContext.InfoDisplayIndex, Mode=TwoWay, Source={x:Reference dummyElement}, FallbackValue=6}"
                                             Width="{Binding DataContext.InfoWidth, Mode=TwoWay, Source={x:Reference dummyElement}, Converter={StaticResource dataGridLengthConverter}}"
                                             Visibility="{Binding DataContext.IsShowInfo, Source={x:Reference dummyElement}, Converter={StaticResource booleanToVisibilityConverter}}">
                     <DataGridTemplateColumn.CellTemplate>

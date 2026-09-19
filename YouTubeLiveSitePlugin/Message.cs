@@ -56,7 +56,11 @@ namespace YouTubeLiveSitePlugin
         //    };
         //    PostedAt = SitePluginCommon.Utils.UnixtimeToDateTime(comment.TimestampUsec / (1000 * 1000));
         //}
-        public YouTubeLiveMembership(MemberShip text, bool isHideMembershipIcon = false) : base("")
+        public YouTubeLiveMembership(MemberShip text) : this(text, false)
+        {
+        }
+
+        public YouTubeLiveMembership(MemberShip text, bool isHideMembershipIcon) : base("")
         {
             UserId = text.AuthorExternalChannelId;
             Id = text.Id;
@@ -82,7 +86,11 @@ namespace YouTubeLiveSitePlugin
         public IMessageImage UserIcon { get; set; }
         public string PurchaseAmount { get; }
 
-        public YouTubeLiveSuperchat(SuperChat text, bool isHideMembershipIcon = false) : base("")
+        public YouTubeLiveSuperchat(SuperChat text) : this(text, false)
+        {
+        }
+
+        public YouTubeLiveSuperchat(SuperChat text, bool isHideMembershipIcon) : base("")
         {
             UserId = text.AuthorExternalChannelId;
             Id = text.Id;
@@ -110,7 +118,11 @@ namespace YouTubeLiveSitePlugin
         public int StickerHeight { get; }
         public string StickerTooltip { get; }
 
-        public YouTubeLivePaidSticker(PaidSticker text, bool isHideMembershipIcon = false) : base("")
+        public YouTubeLivePaidSticker(PaidSticker text) : this(text, false)
+        {
+        }
+
+        public YouTubeLivePaidSticker(PaidSticker text, bool isHideMembershipIcon) : base("")
         {
             UserId = text.ChannelId;
             Id = text.Id;
@@ -136,7 +148,11 @@ namespace YouTubeLiveSitePlugin
         public DateTime PostedAt { get; set; }
         public IMessageImage UserIcon { get; set; }
 
-        public YouTubeLiveSponsorshipsGiftPurchaseAnnouncement(SponsorshipsGiftPurchaseAnnouncement text, bool isHideMembershipIcon = false) : base("")
+        public YouTubeLiveSponsorshipsGiftPurchaseAnnouncement(SponsorshipsGiftPurchaseAnnouncement text) : this(text, false)
+        {
+        }
+
+        public YouTubeLiveSponsorshipsGiftPurchaseAnnouncement(SponsorshipsGiftPurchaseAnnouncement text, bool isHideMembershipIcon) : base("")
         {
             UserId = text.ChannelId;
             Id = text.Id;
@@ -159,7 +175,11 @@ namespace YouTubeLiveSitePlugin
         public DateTime PostedAt { get; set; }
         public IMessageImage UserIcon { get; set; }
 
-        public YouTubeLiveComment(TextMessage text, bool isHideMembershipIcon = false) : base("")
+        public YouTubeLiveComment(TextMessage text) : this(text, false)
+        {
+        }
+
+        public YouTubeLiveComment(TextMessage text, bool isHideMembershipIcon) : base("")
         {
             UserId = text.AuthorExternalChannelId;
             Id = text.Id;

@@ -23,6 +23,8 @@ namespace MultiCommentViewer
     public partial class CommentDataGrid : UserControl
     {
         Dispatcher _dispatcher;
+        private bool _applyingColumnOrder;
+
         public CommentDataGrid()
         {
             InitializeComponent();
@@ -44,6 +46,59 @@ namespace MultiCommentViewer
                 }
                 catch (Exception) { }
             };
+        }
+
+        private void DataGrid_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (!(DataContext is CommentDataGridViewModelBase vm))
+                return;
+
+            var displayIndexes = new[]
+            {
+                vm.ConnectionNameDisplayIndex,
+                vm.ThumbnailDisplayIndex,
+                vm.CommentIdDisplayIndex,
+                vm.UsernameDisplayIndex,
+                vm.MessageDisplayIndex,
+                vm.PostTimeDisplayIndex,
+                vm.InfoDisplayIndex,
+            };
+
+            if (displayIndexes.Length != dataGrid.Columns.Count)
+                return;
+
+            var orderedColumns = displayIndexes
+                .Select((displayIndex, columnIndex) => new { displayIndex, columnIndex })
+                .OrderBy(x => x.displayIndex)
+                .ThenBy(x => x.columnIndex)
+                .ToArray();
+
+            _applyingColumnOrder = true;
+            try
+            {
+                for (var displayIndex = 0; displayIndex < orderedColumns.Length; displayIndex++)
+                {
+                    dataGrid.Columns[orderedColumns[displayIndex].columnIndex].DisplayIndex = displayIndex;
+                }
+            }
+            finally
+            {
+                _applyingColumnOrder = false;
+            }
+        }
+
+        private void DataGrid_ColumnReordered(object sender, DataGridColumnEventArgs e)
+        {
+            if (_applyingColumnOrder || !(DataContext is CommentDataGridViewModelBase vm) || dataGrid.Columns.Count < 7)
+                return;
+
+            vm.ConnectionNameDisplayIndex = dataGrid.Columns[0].DisplayIndex;
+            vm.ThumbnailDisplayIndex = dataGrid.Columns[1].DisplayIndex;
+            vm.CommentIdDisplayIndex = dataGrid.Columns[2].DisplayIndex;
+            vm.UsernameDisplayIndex = dataGrid.Columns[3].DisplayIndex;
+            vm.MessageDisplayIndex = dataGrid.Columns[4].DisplayIndex;
+            vm.PostTimeDisplayIndex = dataGrid.Columns[5].DisplayIndex;
+            vm.InfoDisplayIndex = dataGrid.Columns[6].DisplayIndex;
         }
 
         private void ContextMenu_Opened(object sender, RoutedEventArgs e)

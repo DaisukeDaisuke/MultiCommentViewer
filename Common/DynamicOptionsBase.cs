@@ -11,17 +11,29 @@ namespace Common
     public abstract class DynamicOptionsBase : INotifyPropertyChanged
     {
         Dictionary<string, Item> _dict = new Dictionary<string, Item>();
+        List<string> _unhandledLines = new List<string>();
         protected Dictionary<string, Item> Dict { get => _dict; }
-        public string Serialize()
+        protected virtual string SettingsNamespace => GetType().Assembly.GetName().Name;
+        protected virtual bool ShouldSerialize(string settingName) => true;
+        public virtual string Serialize()
         {
             var sb = new StringBuilder();
             foreach (var kv in _dict)
             {
                 var k = kv.Key;
                 var v = kv.Value;
+                if (!ShouldSerialize(k))
+                    continue;
+                sb.Append(SettingsNamespace);
+                sb.Append(".");
                 sb.Append(k);
                 sb.Append("=");
                 sb.Append(v.Serializer(v.Value));
+                sb.Append(Environment.NewLine);
+            }
+            foreach (var line in _unhandledLines)
+            {
+                sb.Append(line);
                 sb.Append(Environment.NewLine);
             }
             return sb.ToString();
@@ -31,19 +43,56 @@ namespace Common
         /// 
         /// </summary>
         /// <param name="s">name=value separated by CRLF</param>
-        public void Deserialize(string s)
+        public virtual void Deserialize(string s)
         {
             Reset();
+            _unhandledLines.Clear();
             if (string.IsNullOrEmpty(s))
                 return;
             var arr = s.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            var namespacedKeys = new HashSet<string>(StringComparer.Ordinal);
+            var prefix = SettingsNamespace + ".";
             foreach (var line in arr)
             {
-                var kv = line.Split('=');
-                if (kv.Length != 2)
+                var separator = line.IndexOf('=');
+                if (separator <= 0)
                     continue;
-                var k = kv[0];
-                var v = kv[1];
+                var key = line.Substring(0, separator);
+                if (key.StartsWith(prefix, StringComparison.Ordinal))
+                    namespacedKeys.Add(key.Substring(prefix.Length));
+            }
+            foreach (var line in arr)
+            {
+                var separator = line.IndexOf('=');
+                if (separator <= 0)
+                {
+                    _unhandledLines.Add(line);
+                    continue;
+                }
+                var rawKey = line.Substring(0, separator);
+                var v = line.Substring(separator + 1);
+                string k;
+                if (rawKey.StartsWith(prefix, StringComparison.Ordinal))
+                {
+                    k = rawKey.Substring(prefix.Length);
+                    if (!_dict.ContainsKey(k))
+                    {
+                        _unhandledLines.Add(line);
+                        continue;
+                    }
+                }
+                else if (_dict.ContainsKey(rawKey))
+                {
+                    if (namespacedKeys.Contains(rawKey))
+                        continue;
+                    // Legacy name=value format. It is rewritten as namespace.name=value on save.
+                    k = rawKey;
+                }
+                else
+                {
+                    _unhandledLines.Add(line);
+                    continue;
+                }
                 if (_dict.TryGetValue(k, out Item item))
                 {
                     try

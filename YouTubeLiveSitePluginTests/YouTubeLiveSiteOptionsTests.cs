@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using ryu_s.YouTubeLive.Message.Action;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using YouTubeLiveSitePlugin;
@@ -23,6 +24,22 @@ namespace YouTubeLiveSitePluginTests
             reloaded.Deserialize(serialized);
 
             Assert.IsTrue(reloaded.IsHideMembershipIcon);
+        }
+
+        [Test]
+        public void LegacyYouTubeSettingsMigrateToNamespacedKeysWithoutDroppingOtherSettings()
+        {
+            var options = new YouTubeLiveSiteOptions();
+            options.Deserialize("IsAllChat=False\r\nIsHideMembershipIcon=True\r\nOther.Namespace.Value=keep");
+
+            Assert.IsFalse(options.IsAllChat);
+            Assert.IsTrue(options.IsHideMembershipIcon);
+
+            var lines = options.Serialize().Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            CollectionAssert.Contains(lines, "YouTubeLiveSitePlugin.IsAllChat=False");
+            CollectionAssert.Contains(lines, "YouTubeLiveSitePlugin.IsHideMembershipIcon=True");
+            CollectionAssert.Contains(lines, "Other.Namespace.Value=keep");
+            CollectionAssert.DoesNotContain(lines, "IsHideMembershipIcon=True");
         }
 
         [Test]

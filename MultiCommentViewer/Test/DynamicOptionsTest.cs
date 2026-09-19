@@ -15,6 +15,47 @@ namespace MultiCommentViewer.Test
     {
         public string PluginDir => "plugins";
 
+        private static readonly string[] ConnectionsViewDisplayIndexes =
+        {
+            nameof(ConnectionsViewSelectionDisplayIndex),
+            nameof(ConnectionsViewSiteDisplayIndex),
+            nameof(ConnectionsViewConnectionNameDisplayIndex),
+            nameof(ConnectionsViewInputDisplayIndex),
+            nameof(ConnectionsViewBrowserDisplayIndex),
+            nameof(ConnectionsViewConnectionDisplayIndex),
+            nameof(ConnectionsViewDisconnectionDisplayIndex),
+            nameof(ConnectionsViewSaveDisplayIndex),
+            nameof(ConnectionsViewLoggedinUsernameDisplayIndex),
+            nameof(ConnectionsViewConnectionBackgroundDisplayIndex),
+            nameof(ConnectionsViewConnectionForegroundDisplayIndex),
+        };
+
+        private static readonly string[] CommentViewDisplayIndexes =
+        {
+            nameof(ConnectionNameDisplayIndex),
+            nameof(ThumbnailDisplayIndex),
+            nameof(CommentIdDisplayIndex),
+            nameof(UsernameDisplayIndex),
+            nameof(MessageDisplayIndex),
+            nameof(PostTimeDisplayIndex),
+            nameof(InfoDisplayIndex),
+        };
+
+        private static readonly string[] MetadataViewDisplayIndexes =
+        {
+            nameof(MetadataViewConnectionNameDisplayIndex),
+            nameof(MetadataViewTitleDisplayIndex),
+            nameof(MetadataViewElapsedDisplayIndex),
+            nameof(MetadataViewCurrentViewersDisplayIndex),
+            nameof(MetadataViewTotalViewersDisplayIndex),
+            nameof(MetadataViewActiveDisplayIndex),
+            nameof(MetadataViewOthersDisplayIndex),
+        };
+
+        private string ConnectionsViewColumnOrder { get => GetValue(); set => SetValue(value); }
+        private string CommentViewColumnOrder { get => GetValue(); set => SetValue(value); }
+        private string MetadataViewColumnOrder { get => GetValue(); set => SetValue(value); }
+
         #region ConnectionsView
         public int ConnectionsViewConnectionNameDisplayIndex { get => GetValue(); set => SetValue(value); }
         public double ConnectionsViewConnectionNameWidth { get => GetValue(); set => SetValue(value); }
@@ -227,9 +268,88 @@ namespace MultiCommentViewer.Test
         public Color ShowRoomBackColor { get => GetValue(); set => SetValue(value); }
         public Color ShowRoomForeColor { get => GetValue(); set => SetValue(value); }
 
+        protected override bool ShouldSerialize(string settingName)
+        {
+            return !settingName.EndsWith("DisplayIndex", StringComparison.Ordinal);
+        }
+
+        public override string Serialize()
+        {
+            ConnectionsViewColumnOrder = BuildColumnOrder(ConnectionsViewDisplayIndexes);
+            CommentViewColumnOrder = BuildColumnOrder(CommentViewDisplayIndexes);
+            MetadataViewColumnOrder = BuildColumnOrder(MetadataViewDisplayIndexes);
+            return base.Serialize();
+        }
+
+        public override void Deserialize(string s)
+        {
+            var hasConnectionsOrder = ContainsSetting(s, nameof(ConnectionsViewColumnOrder));
+            var hasCommentOrder = ContainsSetting(s, nameof(CommentViewColumnOrder));
+            var hasMetadataOrder = ContainsSetting(s, nameof(MetadataViewColumnOrder));
+
+            base.Deserialize(s);
+
+            LoadColumnOrder(ConnectionsViewDisplayIndexes, hasConnectionsOrder ? ConnectionsViewColumnOrder : BuildColumnOrder(ConnectionsViewDisplayIndexes));
+            LoadColumnOrder(CommentViewDisplayIndexes, hasCommentOrder ? CommentViewColumnOrder : BuildColumnOrder(CommentViewDisplayIndexes));
+            LoadColumnOrder(MetadataViewDisplayIndexes, hasMetadataOrder ? MetadataViewColumnOrder : BuildColumnOrder(MetadataViewDisplayIndexes));
+        }
+
+        private bool ContainsSetting(string serialized, string settingName)
+        {
+            if (string.IsNullOrEmpty(serialized))
+                return false;
+
+            var namespacedName = SettingsNamespace + "." + settingName;
+            var lines = serialized.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var line in lines)
+            {
+                var separator = line.IndexOf('=');
+                if (separator <= 0)
+                    continue;
+                var key = line.Substring(0, separator);
+                if (key == namespacedName || key == settingName)
+                    return true;
+            }
+            return false;
+        }
+
+        private string BuildColumnOrder(IReadOnlyList<string> displayIndexes)
+        {
+            return string.Join(",", displayIndexes
+                .Select((name, defaultIndex) => new { Name = name, Index = (int)Dict[name].Value, DefaultIndex = defaultIndex })
+                .OrderBy(x => x.Index)
+                .ThenBy(x => x.DefaultIndex)
+                .Select(x => x.Name));
+        }
+
+        private void LoadColumnOrder(IReadOnlyList<string> displayIndexes, string serializedOrder)
+        {
+            var known = new HashSet<string>(displayIndexes, StringComparer.Ordinal);
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            var ordered = new List<string>();
+
+            foreach (var name in (serializedOrder ?? "").Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (known.Contains(name) && seen.Add(name))
+                    ordered.Add(name);
+            }
+            foreach (var name in displayIndexes)
+            {
+                if (seen.Add(name))
+                    ordered.Add(name);
+            }
+
+            for (var i = 0; i < ordered.Count; i++)
+            {
+                Dict[ordered[i]].Value = i;
+                RaisePropertyChanged(ordered[i]);
+            }
+        }
+
         protected override void Init()
         {
             #region ConnectionsView
+            Dict.Add(nameof(ConnectionsViewColumnOrder), new Item { DefaultValue = string.Join(",", ConnectionsViewDisplayIndexes), Predicate = s => true, Serializer = s => s, Deserializer = s => s });
             Dict.Add(nameof(ConnectionsViewSelectionDisplayIndex), new Item { DefaultValue = 0, Predicate = f => f >= 0, Serializer = f => f.ToString(), Deserializer = s => int.Parse(s) });
             Dict.Add(nameof(ConnectionsViewSelectionWidth), new Item { DefaultValue = 48, Predicate = n => n > 0, Serializer = n => n.ToString(), Deserializer = s => double.Parse(s) });
             Dict.Add(nameof(IsShowConnectionsViewSelection), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
@@ -321,6 +441,7 @@ namespace MultiCommentViewer.Test
             Dict.Add(nameof(MessageDisplayIndex), new Item { DefaultValue = 4, Predicate = n => n >= 0, Serializer = n => n.ToString(), Deserializer = s => int.Parse(s) });
             Dict.Add(nameof(PostTimeDisplayIndex), new Item { DefaultValue = 5, Predicate = n => n >= 0, Serializer = n => n.ToString(), Deserializer = s => int.Parse(s) });
             Dict.Add(nameof(InfoDisplayIndex), new Item { DefaultValue = 6, Predicate = n => n >= 0, Serializer = n => n.ToString(), Deserializer = s => int.Parse(s) });
+            Dict.Add(nameof(CommentViewColumnOrder), new Item { DefaultValue = string.Join(",", CommentViewDisplayIndexes), Predicate = s => true, Serializer = s => s, Deserializer = s => s });
 
             Dict.Add(nameof(IsShowConnectionName), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
             Dict.Add(nameof(IsShowThumbnail), new Item { DefaultValue = false, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
@@ -337,6 +458,7 @@ namespace MultiCommentViewer.Test
             Dict.Add(nameof(MetadataViewTotalViewersDisplayIndex), new Item { DefaultValue = 4, Predicate = n => n >= 0, Serializer = n => n.ToString(), Deserializer = s => int.Parse(s) });
             Dict.Add(nameof(MetadataViewActiveDisplayIndex), new Item { DefaultValue = 5, Predicate = n => n >= 0, Serializer = n => n.ToString(), Deserializer = s => int.Parse(s) });
             Dict.Add(nameof(MetadataViewOthersDisplayIndex), new Item { DefaultValue = 6, Predicate = n => n >= 0, Serializer = n => n.ToString(), Deserializer = s => int.Parse(s) });
+            Dict.Add(nameof(MetadataViewColumnOrder), new Item { DefaultValue = string.Join(",", MetadataViewDisplayIndexes), Predicate = s => true, Serializer = s => s, Deserializer = s => s });
             Dict.Add(nameof(IsShowMetaConnectionName), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
             Dict.Add(nameof(IsShowMetaTitle), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });
             Dict.Add(nameof(IsShowMetaElapse), new Item { DefaultValue = true, Predicate = b => true, Serializer = b => b.ToString(), Deserializer = s => bool.Parse(s) });

@@ -21,6 +21,8 @@ namespace MultiCommentViewer
     /// </summary>
     public partial class MainWindow : Window
     {
+        private bool _applyingColumnOrder;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -102,6 +104,101 @@ namespace MultiCommentViewer
                     Debug.WriteLine(ex.Message);
                 }
             });
+        }
+
+        private void ConnectionsDataGrid_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (!(DataContext is MainViewModel vm))
+                return;
+
+            ApplyColumnOrder(ConnectionsDataGrid, new[]
+            {
+                vm.ConnectionsViewSelectionDisplayIndex,
+                vm.ConnectionsViewSiteDisplayIndex,
+                vm.ConnectionsViewConnectionNameDisplayIndex,
+                vm.ConnectionsViewInputDisplayIndex,
+                vm.ConnectionsViewBrowserDisplayIndex,
+                vm.ConnectionsViewConnectionDisplayIndex,
+                vm.ConnectionsViewDisconnectionDisplayIndex,
+                vm.ConnectionsViewSaveDisplayIndex,
+                vm.ConnectionsViewLoggedinUsernameDisplayIndex,
+                vm.ConnectionsViewConnectionBackgroundDisplayIndex,
+                vm.ConnectionsViewConnectionForegroundDisplayIndex,
+            });
+        }
+
+        private void ConnectionsDataGrid_ColumnReordered(object sender, DataGridColumnEventArgs e)
+        {
+            if (_applyingColumnOrder || !(DataContext is MainViewModel vm))
+                return;
+
+            vm.ConnectionsViewSelectionDisplayIndex = ConnectionsDataGrid.Columns[0].DisplayIndex;
+            vm.ConnectionsViewSiteDisplayIndex = ConnectionsDataGrid.Columns[1].DisplayIndex;
+            vm.ConnectionsViewConnectionNameDisplayIndex = ConnectionsDataGrid.Columns[2].DisplayIndex;
+            vm.ConnectionsViewInputDisplayIndex = ConnectionsDataGrid.Columns[3].DisplayIndex;
+            vm.ConnectionsViewBrowserDisplayIndex = ConnectionsDataGrid.Columns[4].DisplayIndex;
+            vm.ConnectionsViewConnectionDisplayIndex = ConnectionsDataGrid.Columns[5].DisplayIndex;
+            vm.ConnectionsViewDisconnectionDisplayIndex = ConnectionsDataGrid.Columns[6].DisplayIndex;
+            vm.ConnectionsViewSaveDisplayIndex = ConnectionsDataGrid.Columns[7].DisplayIndex;
+            vm.ConnectionsViewLoggedinUsernameDisplayIndex = ConnectionsDataGrid.Columns[8].DisplayIndex;
+            vm.ConnectionsViewConnectionBackgroundDisplayIndex = ConnectionsDataGrid.Columns[9].DisplayIndex;
+            vm.ConnectionsViewConnectionForegroundDisplayIndex = ConnectionsDataGrid.Columns[10].DisplayIndex;
+        }
+
+        private void MetadataDataGrid_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (!(DataContext is MainViewModel vm))
+                return;
+
+            ApplyColumnOrder(MetadataDataGrid, new[]
+            {
+                vm.MetadataViewConnectionNameDisplayIndex,
+                vm.MetadataViewTitleDisplayIndex,
+                vm.MetadataViewElapsedDisplayIndex,
+                vm.MetadataViewCurrentViewersDisplayIndex,
+                vm.MetadataViewTotalViewersDisplayIndex,
+                vm.MetadataViewActiveDisplayIndex,
+                vm.MetadataViewOthersDisplayIndex,
+            });
+        }
+
+        private void MetadataDataGrid_ColumnReordered(object sender, DataGridColumnEventArgs e)
+        {
+            if (_applyingColumnOrder || !(DataContext is MainViewModel vm))
+                return;
+
+            vm.MetadataViewConnectionNameDisplayIndex = MetadataDataGrid.Columns[0].DisplayIndex;
+            vm.MetadataViewTitleDisplayIndex = MetadataDataGrid.Columns[1].DisplayIndex;
+            vm.MetadataViewElapsedDisplayIndex = MetadataDataGrid.Columns[2].DisplayIndex;
+            vm.MetadataViewCurrentViewersDisplayIndex = MetadataDataGrid.Columns[3].DisplayIndex;
+            vm.MetadataViewTotalViewersDisplayIndex = MetadataDataGrid.Columns[4].DisplayIndex;
+            vm.MetadataViewActiveDisplayIndex = MetadataDataGrid.Columns[5].DisplayIndex;
+            vm.MetadataViewOthersDisplayIndex = MetadataDataGrid.Columns[6].DisplayIndex;
+        }
+
+        private void ApplyColumnOrder(DataGrid dataGrid, int[] displayIndexes)
+        {
+            if (displayIndexes.Length != dataGrid.Columns.Count)
+                return;
+
+            var orderedColumns = displayIndexes
+                .Select((displayIndex, columnIndex) => new { displayIndex, columnIndex })
+                .OrderBy(x => x.displayIndex)
+                .ThenBy(x => x.columnIndex)
+                .ToArray();
+
+            _applyingColumnOrder = true;
+            try
+            {
+                for (var displayIndex = 0; displayIndex < orderedColumns.Length; displayIndex++)
+                {
+                    dataGrid.Columns[orderedColumns[displayIndex].columnIndex].DisplayIndex = displayIndex;
+                }
+            }
+            finally
+            {
+                _applyingColumnOrder = false;
+            }
         }
 
         /// <summary>

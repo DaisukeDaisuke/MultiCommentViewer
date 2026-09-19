@@ -31,5 +31,29 @@ namespace CommonTests
             Assert.AreEqual("8", options.Prop1);
             Assert.AreEqual("2", options.Prop2);
         }
+
+        [Test]
+        public void SerializeUsesNamespacedKeysAndKeepsUnknownSettings()
+        {
+            var options = new TestOptions();
+            options.Deserialize("Prop1=8\r\nOther.Namespace.Value=a=b");
+
+            var serialized = options.Serialize();
+            var lines = serialized.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+
+            CollectionAssert.Contains(lines, "CommonTests.Prop1=8");
+            CollectionAssert.Contains(lines, "CommonTests.Prop2=2");
+            CollectionAssert.Contains(lines, "Other.Namespace.Value=a=b");
+            CollectionAssert.DoesNotContain(lines, "Prop1=8");
+        }
+
+        [Test]
+        public void NamespacedValueWinsOverLegacyValue()
+        {
+            var options = new TestOptions();
+            options.Deserialize("Prop1=legacy\r\nCommonTests.Prop1=current");
+
+            Assert.AreEqual("current", options.Prop1);
+        }
     }
 }
