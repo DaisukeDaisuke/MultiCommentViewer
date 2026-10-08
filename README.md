@@ -5,4 +5,4 @@
 
 ### 詳しくはリリースに書いています！
 
-https://github.com/DaisukeDaisuke/MultiCommentViewer/releases
+https://github.com/DaisukeDaisuke/MultiCommentViewer/releases/latest
